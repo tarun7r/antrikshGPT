@@ -68,7 +68,7 @@ class SpaceGPTAgent:
             
             # Store configuration for recreating LLM client when needed
             self.llm_config = {
-                "model": "gemini-2.5-flash",
+                "model": "gemini-2.0-flash",
                 "google_api_key": os.getenv("GOOGLE_API_KEY"),
                 "temperature": 0.7,
                 "timeout": 30,
@@ -273,6 +273,17 @@ class SpaceGPTAgent:
             tool_func=space_api.get_exoplanet_info,
             schema={
                 "planet_name": (str, ...)
+            }
+        ))
+        
+        # Web Search tool (fallback for space queries not covered by specific tools)
+        tools.append(MCPTool(
+            name="web_search_space",
+            description="Search the web for space-related information. Use this as a fallback when specific space data tools don't cover the user's query. Only use for space, astronomy, or space exploration related queries.",
+            tool_func=space_api.web_search_space,
+            schema={
+                "query": (str, ...),
+                "num_results": (int, 5)
             }
         ))
         
@@ -661,6 +672,11 @@ You MUST call the appropriate tool(s) for these query types:
 - ANY asteroid/comet question → get_near_earth_objects(start_date, end_date)
 - "Asteroids", "NEOs", "near Earth objects" → get_near_earth_objects() - If no date is provided, **DEFAULT TO THE NEXT 7 DAYS**
 
+**Fallback Web Search:**
+- For space-related queries NOT covered by the above tools → web_search_space(query, num_results)
+- Use for topics like: space history, space agencies, space technology, astronaut biographies, space missions not covered by SpaceX, theoretical physics related to space, space science concepts, etc.
+- ONLY use web search for space/astronomy related queries - never for non-space topics
+
 ## DATE HANDLING
 - Today's date is {{current_date}}.
 - ALWAYS convert relative dates like "next week", "tomorrow", "next 7 days" into `YYYY-MM-DD` format for tool calls.
@@ -678,6 +694,7 @@ You MUST call the appropriate tool(s) for these query types:
 - get_solar_system_body(body_id) - Detailed solar system body information
 - get_space_weather(start_date, end_date) - Space weather news (solar storms, CMEs, auroras)
 - get_exoplanet_info(planet_name) - Exoplanet information and recent discoveries
+- web_search_space(query, num_results) - Web search for space topics not covered by specific tools (fallback only)
 
 ## RESPONSE PROTOCOL
 1. **ANALYZE** the user's question to identify required tools

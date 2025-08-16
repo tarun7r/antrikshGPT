@@ -485,6 +485,33 @@ async def get_cache_stats():
     }
 
 
+@app.get("/api/space-search/{query}")
+async def space_search(query: str, num_results: int = 5):
+    """Web search for space-related queries as a fallback."""
+    try:
+        data = await cache_manager.get_data(
+            f"web_search_{query}_{num_results}", 
+            space_api.web_search_space,
+            query=query,
+            num_results=num_results
+        )
+        return {
+            "data": data,
+            "timestamp": datetime.now().isoformat(),
+            "type": "space_search",
+            "query": query,
+            "cached": data.get("cached", False)
+        }
+    except Exception as e:
+        return {
+            "data": {"error": f"Search failed: {str(e)}", "query": query},
+            "timestamp": datetime.now().isoformat(),
+            "type": "space_search",
+            "query": query,
+            "cached": False
+        }
+
+
 @app.post("/api/cache/clear")
 async def clear_cache(current_user: User = Depends(get_current_user)):
     """Clear all cached data (admin endpoint)."""

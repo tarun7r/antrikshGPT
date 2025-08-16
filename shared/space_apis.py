@@ -521,6 +521,193 @@ class SpaceAPIClient:
             logger.error(error_msg)
             return {"error": error_msg}
 
+    async def web_search_space(self, query: str, num_results: int = 5) -> Dict[str, Any]:
+        """
+        Perform a web search for space-related queries with multiple fallback strategies.
+        This serves as a fallback for space queries not covered by our specific tools.
+        """
+        cache_key = self._get_cache_key("web_search", query=query, num_results=num_results)
+        cached_data = self._get_cached_data(cache_key)
+        if cached_data:
+            return cached_data
+        
+        # Strategy 1: Try DuckDuckGo Instant Answer API
+        search_result = await self._try_duckduckgo_search(query, num_results)
+        if search_result and not search_result.get("error"):
+            self._set_cached_data(cache_key, search_result)
+            return search_result
+        
+        # Strategy 2: Use Wikipedia API for space topics
+        wikipedia_result = await self._try_wikipedia_search(query, num_results)
+        if wikipedia_result and not wikipedia_result.get("error"):
+            self._set_cached_data(cache_key, wikipedia_result)
+            return wikipedia_result
+        
+        # Strategy 3: Provide curated space knowledge for common topics
+        curated_result = self._get_curated_space_info(query)
+        if curated_result:
+            self._set_cached_data(cache_key, curated_result)
+            return curated_result
+        
+        # If all strategies fail, return a helpful response
+        return {
+            "query": query,
+            "search_type": "fallback",
+            "source": "SpaceGPT Knowledge Base",
+            "note": f"I don't have specific real-time information about '{query}', but it's a space-related topic. You might want to try searching for more specific terms or check recent space news for the latest updates.",
+            "suggestions": [
+                "Try searching for more specific terms",
+                "Check recent space news for updates",
+                "Ask about related topics I do have tools for"
+            ],
+            "available_tools": [
+                "ISS location and astronauts",
+                "SpaceX launches",
+                "Mars weather and photos", 
+                "Near Earth objects/asteroids",
+                "Space news",
+                "Solar system bodies",
+                "Space weather events",
+                "Exoplanet information"
+            ]
+        }
+    
+    async def _try_duckduckgo_search(self, query: str, num_results: int) -> Optional[Dict[str, Any]]:
+        """Try DuckDuckGo instant answer API."""
+        url = "https://api.duckduckgo.com/"
+        params = {
+            "q": f"space astronomy {query}",
+            "format": "json",
+            "no_html": "1",
+            "skip_disambig": "1"
+        }
+        
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, params=params, timeout=10) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        
+                        # Check if we got useful information
+                        if any([data.get("Abstract"), data.get("Definition"), data.get("Answer"), data.get("Results")]):
+                            return {
+                                "query": query,
+                                "abstract": data.get("Abstract", ""),
+                                "abstract_text": data.get("AbstractText", ""),
+                                "abstract_source": data.get("AbstractSource", ""),
+                                "abstract_url": data.get("AbstractURL", ""),
+                                "definition": data.get("Definition", ""),
+                                "definition_source": data.get("DefinitionSource", ""),
+                                "definition_url": data.get("DefinitionURL", ""),
+                                "related_topics": data.get("RelatedTopics", [])[:num_results],
+                                "results": data.get("Results", [])[:num_results],
+                                "answer": data.get("Answer", ""),
+                                "answer_type": data.get("AnswerType", ""),
+                                "infobox": data.get("Infobox", {}),
+                                "search_type": "web_search",
+                                "source": "DuckDuckGo"
+                            }
+        except Exception as e:
+            logger.warning(f"DuckDuckGo search failed: {str(e)}")
+        
+        return None
+    
+    async def _try_wikipedia_search(self, query: str, num_results: int) -> Optional[Dict[str, Any]]:
+        """Try Wikipedia API for space topics."""
+        # Wikipedia API endpoint
+        url = "https://en.wikipedia.org/api/rest_v1/page/summary/" + query.replace(" ", "_")
+        
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, timeout=10) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        
+                        return {
+                            "query": query,
+                            "title": data.get("title", ""),
+                            "extract": data.get("extract", ""),
+                            "description": data.get("description", ""),
+                            "content_url": data.get("content_urls", {}).get("desktop", {}).get("page", ""),
+                            "thumbnail": data.get("thumbnail", {}).get("source", ""),
+                            "search_type": "wikipedia_search",
+                            "source": "Wikipedia"
+                        }
+        except Exception as e:
+            logger.warning(f"Wikipedia search failed: {str(e)}")
+        
+        return None
+    
+    def _get_curated_space_info(self, query: str) -> Optional[Dict[str, Any]]:
+        """Provide curated information for common space topics."""
+        query_lower = query.lower()
+        
+        # Curated space knowledge database
+        space_knowledge = {
+            "black hole": {
+                "description": "Black holes are regions of spacetime where gravity is so strong that nothing, not even light, can escape once it crosses the event horizon.",
+                "key_facts": [
+                    "Formed when massive stars collapse at the end of their lives",
+                    "The event horizon is the point of no return",
+                    "They emit Hawking radiation and can eventually evaporate",
+                    "Supermassive black holes exist at the centers of most galaxies"
+                ],
+                "famous_examples": ["Sagittarius A* (center of Milky Way)", "M87*", "Cygnus X-1"],
+                "recent_discoveries": "First image of a black hole (M87*) captured by Event Horizon Telescope in 2019"
+            },
+            "nasa": {
+                "description": "The National Aeronautics and Space Administration (NASA) is the United States government agency responsible for civilian space program and aerospace research.",
+                "founded": "July 29, 1958",
+                "headquarters": "Washington, D.C.",
+                "major_achievements": [
+                    "Apollo Moon landings (1969-1972)",
+                    "Space Shuttle Program (1981-2011)",
+                    "Hubble Space Telescope",
+                    "Mars rover missions",
+                    "International Space Station partnership"
+                ],
+                "current_programs": ["Artemis (return to Moon)", "Mars exploration", "James Webb Space Telescope"]
+            },
+            "ion drive": {
+                "description": "Ion drives are a type of electric propulsion that accelerates ions to generate thrust with very high efficiency.",
+                "how_it_works": [
+                    "Ionizes propellant (usually xenon gas)",
+                    "Accelerates ions using electric fields",
+                    "Produces very small but constant thrust",
+                    "Extremely fuel efficient for long missions"
+                ],
+                "advantages": ["High specific impulse", "Long operational life", "Precise control"],
+                "missions": ["Dawn (asteroid belt)", "Deep Space 1", "BepiColombo (Mercury)"]
+            },
+            "neil armstrong": {
+                "description": "Neil Alden Armstrong (1930-2012) was an American astronaut and the first person to walk on the Moon.",
+                "born": "August 5, 1930, Ohio",
+                "died": "August 25, 2012",
+                "famous_quote": "That's one small step for man, one giant leap for mankind",
+                "career": [
+                    "Naval aviator and test pilot",
+                    "Gemini 8 commander (1966)",
+                    "Apollo 11 commander (1969)",
+                    "First person to step onto the Moon (July 20, 1969)"
+                ],
+                "legacy": "Pioneered human space exploration and lunar landing"
+            }
+        }
+        
+        # Find matching topics
+        for topic, info in space_knowledge.items():
+            if topic in query_lower or any(word in query_lower for word in topic.split()):
+                return {
+                    "query": query,
+                    "topic": topic.title(),
+                    "information": info,
+                    "search_type": "curated_knowledge",
+                    "source": "SpaceGPT Knowledge Base",
+                    "note": "This information is from our curated space knowledge database."
+                }
+        
+        return None
+
 
 # Global instance
 space_api = SpaceAPIClient()
