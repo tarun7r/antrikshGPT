@@ -181,15 +181,24 @@ class SmartCacheManager:
             stats["cache_ages"][endpoint] = int(current_time - timestamp)
         
         for endpoint, calls in self._api_call_counts.items():
-            rate_config = self._rate_limits.get(endpoint, {"calls": 0, "window": 3600})
-            window_start = current_time - rate_config["window"]
-            recent_calls = len([c for c in calls if c > window_start])
-            stats["rate_limit_status"][endpoint] = {
-                "calls_in_window": recent_calls,
-                "limit": rate_config["calls"],
-                "window_hours": rate_config["window"] / 3600,
-                "is_limited": recent_calls >= rate_config["calls"]
-            }
+            if endpoint in self._rate_limits:
+                rate_config = self._rate_limits[endpoint]
+                window_start = current_time - rate_config["window"]
+                recent_calls = len([c for c in calls if c > window_start])
+                stats["rate_limit_status"][endpoint] = {
+                    "calls_in_window": recent_calls,
+                    "limit": rate_config["calls"],
+                    "window_hours": rate_config["window"] / 3600,
+                    "is_limited": recent_calls >= rate_config["calls"]
+                }
+            else:
+                # No explicit rate limit configured for this endpoint
+                stats["rate_limit_status"][endpoint] = {
+                    "calls_in_window": len(calls),
+                    "limit": None,
+                    "window_hours": None,
+                    "is_limited": False
+                }
         
         return stats
 
@@ -352,7 +361,8 @@ async def get_space_data(data_type: str):
             "spacex-launches": lambda: space_api.get_spacex_launches(limit=5),
             "space-news": lambda: space_api.get_space_news(limit=5),
             "mars-weather": space_api.get_mars_weather,
-            "space-weather": lambda: space_api.get_space_weather(limit=3),
+            # Default to last 7 days if no dates are given (handled in the client)
+            "space-weather": lambda: space_api.get_space_weather(),
             "near-earth-objects": lambda: space_api.get_near_earth_objects(),
         }
         
