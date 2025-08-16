@@ -2,7 +2,8 @@
 
 > **Antriksh** (अंतरिक्ष) means "space" in Sanskrit/Hindi
 
-An impressive AI-powered space exploration webapp that combines cutting-edge AI with real-time space data to create an immersive cosmic experience.
+An impressive AI-powered space exploration webapp that combines cutting-edge AI with real-time space data to create an immersive cosmic experience. This version is optimized for serverless deployment on Vercel.
+
 ## Quick Start
 
 ### Prerequisites
