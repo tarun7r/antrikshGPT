@@ -5,15 +5,15 @@
 [![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Vercel Deployment](https://img.shields.io/badge/deploy-vercel-black.svg)](https://vercel.com/)
 
-> **Antriksh** (अंतरिक्ष) means "space" in Sanskrit/Hindi.
+> **Antriksh** ( अंतरिक्ष ) means "space" in Sanskrit/Hindi.
 
-**antrikshGPT** is an AI-powered space exploration web application that combines the power of Google's Gemini with real-time space data to create an immersive and educational cosmic experience. This version is optimized for easy, serverless deployment on Vercel.
+**antrikshGPT** is an AI-powered space exploration web application that combines the power of a large language model (LLM) with real-time space data to create an immersive and educational cosmic experience. This version is optimized for easy, serverless deployment on Vercel.
 
 ![antrikshGPT Demo](demo.png)
 
 ## ✨ Key Features
 
-- **Conversational AI:** Powered by **Gemini 2.0 Flash** via LangChain for accurate and engaging conversations about space.
+- **Conversational AI:** Powered by an **LLM** via LangChain for accurate and engaging conversations about space.
 - **Real-Time Space Data:** Integrates with **13 specialized space APIs** to provide live data on:
   - 🛰️ **ISS Tracking:** Real-time location of the International Space Station.
   - 🚀 **SpaceX Missions:** Details on upcoming and past launches.
@@ -27,7 +27,7 @@
 
 ## 🛠️ Technology Stack
 
-- **AI/ML:** Gemini 2.0 Flash, LangChain, LangGraph
+- **AI/ML:** LLM, LangChain, LangGraph
 - **Backend:** FastAPI, WebSockets, AsyncIO, AIOHTTP
 - **Frontend:** HTML5, CSS3, JavaScript (ES6+)
 - **Deployment:** Vercel (Serverless)
@@ -55,7 +55,7 @@
     ```bash
     cp env.sample .env
     ```
-    - `GOOGLE_API_KEY`: Your Google AI API key for Gemini.
+    - `GOOGLE_API_KEY`: Your Google AI API key for the LLM.
     - `SECRET_KEY`: A secret key for JWT. Generate one with `openssl rand -hex 32`.
 
 3.  **Install dependencies:**
