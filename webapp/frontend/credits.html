@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Credits - antrikshGPT</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .credits-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: rgba(26, 26, 46, 0.8);
+            border-radius: 16px;
+            border: 1px solid rgba(0, 217, 255, 0.2);
+            flex-grow: 1;
+        }
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--space-cyan);
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 217, 255, 0.2);
+        }
+        th {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--space-cyan);
+        }
+        a {
+            color: var(--space-gold);
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated space background -->
+    <div class="space-bg">
+        <div class="stars"></div>
+        <div class="stars2"></div>
+        <div class="stars3"></div>
+        <div class="nebula"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <a href="/" style="text-decoration: none; color: inherit;">
+                    <div class="logo">
+                        <div class="logo-icon">🚀</div>
+                        <h1 class="logo-text">antriksh<span class="logo-highlight">GPT</span></h1>
+                    </div>
+                </a>
+                <div class="status-indicator">
+                    <div class="status-dot" id="status-dot" style="background: var(--space-green);"></div>
+                    <span class="status-text" id="status-text">Online</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="credits-container">
+            <h1>API Credits & Acknowledgements</h1>
+            <p style="text-align: center; margin-bottom: 2rem; color: var(--space-gray);">antrikshGPT is powered by a constellation of open-source APIs. We are deeply grateful to the following providers for making their data available to the world.</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data Service</th>
+                        <th>Provider</th>
+                        <th>Purpose in antrikshGPT</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>ISS Location</td>
+                        <td><a href="http://open-notify.org/Open-Notify-API/ISS-Location-Now/" target="_blank">Open-Notify</a></td>
+                        <td>Provides real-time tracking of the International Space Station's coordinates.</td>
+                    </tr>
+                    <tr>
+                        <td>People in Space</td>
+                        <td><a href="http://open-notify.org/Open-Notify-API/People-In-Space/" target="_blank">Open-Notify</a></td>
+                        <td>Lists the current astronauts living and working in space.</td>
+                    </tr>
+                    <tr>
+                        <td>Astronomy Picture of the Day</td>
+                        <td><a href="https://api.nasa.gov/" target="_blank">NASA APIs</a></td>
+                        <td>Delivers the stunning, daily Astronomy Picture of the Day (APOD).</td>
+                    </tr>
+                    <tr>
+                        <td>Mars Weather</td>
+                        <td><a href="https://api.nasa.gov/" target="_blank">NASA APIs</a></td>
+                        <td>Offers the latest weather reports and atmospheric data from Mars.</td>
+                    </tr>
+                    <tr>
+                        <td>SpaceX Launches</td>
+                        <td><a href="https://thespacedevs.com/llapi" target="_blank">The Space Devs</a></td>
+                        <td>Gives detailed information on upcoming and past SpaceX rocket launches.</td>
+                    </tr>
+                    <tr>
+                        <td>Space News</td>
+                        <td><a href="https://spaceflightnewsapi.net/" target="_blank">Spaceflight News API</a></td>
+                        <td>Fetches the latest articles and breaking news from space exploration.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p style="text-align: center; margin-top: 2rem; color: var(--space-gray);">This project stands on the shoulders of giants. The open data community makes applications like this possible, and we extend our sincere thanks to all of them.</p>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="sanskrit-quote">ऋतं सत्यं परं ब्रह्म। - "Cosmic order (ṛta) and truth (satya) are the supreme Brahman." </div>
+                <p>&copy; 2025 antrikshGPT - Made with ❤️ for the love of space</p>
+                <div class="footer-links">
+                    <a href="https://github.com/tarun7r/antrikshGPT" target="_blank">GitHub</a>
+                    <span class="footer-separator">|</span>
+                    <a href="/credits" target="_blank">API Credits</a>
+                    <span class="footer-separator">|</span>
+                    <span class="powered-by">Powered by Open-Notify, NASA, The Space Devs & more</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

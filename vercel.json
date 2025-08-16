@@ -1,0 +1,35 @@
+
+{
+  "builds": [
+    {
+      "src": "api/index.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "webapp/frontend/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/favicon.ico",
+      "dest": "/webapp/frontend/favicon.ico"
+    },
+    {
+      "src": "/",
+      "dest": "/webapp/frontend/index.html"
+    },
+    {
+      "src": "/credits",
+      "dest": "/webapp/frontend/credits.html"
+    },
+    {
+      "src": "/static/(.*)",
+      "dest": "/webapp/frontend/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/api/index.py"
+    }
+  ]
+}

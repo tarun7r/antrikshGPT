@@ -1,0 +1,28 @@
+# Core dependencies
+fastapi
+uvicorn
+pydantic
+pydantic-settings
+python-dotenv
+requests
+websockets
+
+# MCP Server dependencies
+fastmcp
+aiohttp
+httpx
+
+# LangChain and Gemini integration
+langchain
+langchain-google-genai
+
+# Web interface
+jinja2
+python-multipart
+websockets
+
+# Added for auth
+python-jose[cryptography]
+passlib[bcrypt]
+# Added for logging
+structlog

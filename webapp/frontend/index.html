@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>antrikshGPT - AI Space Explorer</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+</head>
+<body>
+    <!-- Animated space background -->
+    <div class="space-bg">
+        <div class="stars"></div>
+        <div class="stars2"></div>
+        <div class="stars3"></div>
+        <div class="nebula"></div>
+    </div>
+
+    <!-- Main container -->
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">👨‍🚀</div>
+                    <h1 class="logo-text">antriksh<span class="logo-highlight">GPT</span></h1>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main content area -->
+        <main class="main-content">
+            <!-- Left sidebar - Ultra Lightweight widgets -->
+            <aside class="sidebar">
+                <!-- ISS Live Tracker (Ultra fast) -->
+                <div class="widget iss-widget">
+                    <div class="widget-header">
+                        <h3>🛰️ ISS Live Tracker</h3>
+                        <div class="refresh-indicator" id="iss-refresh"></div>
+                    </div>
+                    <div class="widget-content">
+                        <div class="iss-location" id="iss-location">
+                            <div class="loading">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mars Weather -->
+                <div class="widget space-news-widget">
+                    <div class="widget-header">
+                        <h3>📰 Space News</h3>
+                        <div class="refresh-indicator" id="space-news-refresh"></div>
+                    </div>
+                    <div class="widget-content">
+                        <div id="space-news-content">
+                            <div class="loading">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Center - Chat interface -->
+            <section class="chat-section">
+                <div class="chat-container">
+                    <div class="chat-header">
+                        <div class="chat-header-title">
+                            <h2>👨‍🚀 antrikshGPT Assistant</h2>
+                        </div>
+                        <p>Your AI-powered space exploration companion</p>
+                    </div>
+                    
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="message assistant-message welcome-message">
+                            <div class="message-avatar">🚀</div>
+                            <div class="message-content">
+                                <p>Welcome to antrikshGPT! 🌌</p>
+                                <p>I'm your AI space exploration assistant with access to real-time space data. Ask me about:</p>
+                                <ul>
+                                    <li>🛰️ International Space Station location</li>
+                                    <li>🚀 SpaceX launches and missions</li>
+                                    <li>🔴 Mars weather and rover photos</li>
+                                    <li>📡 Space news and discoveries</li>
+                                    <li>👨‍🚀 Current astronauts in space</li>
+                                    <li>🌍 Near Earth objects and asteroids</li>
+                                </ul>
+                                <p>What would you like to explore today?</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-input-container">
+                        <div class="chat-input-wrapper">
+                            <textarea
+                                id="chat-input"
+                                placeholder="Ask me about space exploration, missions, or cosmic phenomena..."
+                                maxlength="1000"
+                                rows="1"
+                            ></textarea>
+                            <button id="send-button" class="send-button">
+                                <span class="send-icon">🚀</span>
+                            </button>
+                        </div>
+                        <div class="chat-input-footer">
+                            <div class="char-counter" id="char-counter">1000</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right sidebar - Minimal Space Data -->
+            <aside class="sidebar-right">
+                <!-- Next SpaceX Launch (Single API call) -->
+                <div class="widget launches-widget">
+                    <div class="widget-header">
+                        <h3>🚀 Next Launch</h3>
+                        <div class="refresh-indicator" id="launch-refresh"></div>
+                    </div>
+                    <div class="widget-content">
+                        <div class="launches-content" id="launches-content">
+                            <div class="loading">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mission Stats (Static/Computed) -->
+                <div class="widget neo-widget">
+                    <div class="widget-header">
+                        <h3>🌍 Near-Earth Objects</h3>
+                        <div class="refresh-indicator" id="neo-refresh"></div>
+                    </div>
+                    <div class="widget-content">
+                        <div id="neo-content">
+                            <div class="loading">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </main>
+
+        <!-- Sample Questions Section -->
+        <section class="suggestion-section">
+            <h3 class="suggestion-header">🚀 Try These Questions</h3>
+            <div class="input-suggestions">
+                <button class="suggestion-chip" data-query="Where is the ISS right now?">📍 ISS Location</button>
+                <button class="suggestion-chip" data-query="What's the next SpaceX launch?">🚀 Next Launch</button>
+                <button class="suggestion-chip" data-query="What's the weather like on Mars?">🔴 Mars Weather</button>
+                <button class="suggestion-chip" data-query="Who is in space right now?">👨‍🚀 People in Space</button>
+                <button class="suggestion-chip" data-query="Latest space news">📡 Space News</button>
+            </div>
+        </section>
+
+        <!-- Capabilities Section -->
+        <section class="capabilities-section">
+            <h3 class="suggestion-header">🌌 Explore the Cosmos</h3>
+            <div class="capabilities-grid">
+                <div class="capability-card">
+                    <div class="capability-icon">🛰️</div>
+                    <div class="capability-text">
+                        <h4>ISS & Astronauts</h4>
+                        <p>"Where is the ISS right now?"</p>
+                        <p>"Who is currently in space?"</p>
+                    </div>
+                </div>
+                <div class="capability-card">
+                    <div class="capability-icon">🚀</div>
+                    <div class="capability-text">
+                        <h4>SpaceX Missions</h4>
+                        <p>"What is the next SpaceX launch?"</p>
+                        <p>"Show me recent launches."</p>
+                    </div>
+                </div>
+                <div class="capability-card">
+                    <div class="capability-icon">🔴</div>
+                    <div class="capability-text">
+                        <h4>Mars Exploration</h4>
+                        <p>"What's the weather on Mars?"</p>
+                        <p>"Show photos from Curiosity."</p>
+                    </div>
+                </div>
+                <div class="capability-card">
+                    <div class="capability-icon">🪐</div>
+                    <div class="capability-text">
+                        <h4>Solar System</h4>
+                        <p>"Tell me about Jupiter."</p>
+                        <p>"Are there any asteroids nearby?"</p>
+                    </div>
+                </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="sanskrit-quote">ऋतं सत्यं परं ब्रह्म। - "Cosmic order (ṛta) and truth (satya) are the supreme Brahman."</div>
+                <p>&copy; 2025 antrikshGPT - Made with ❤️ for the love of space</p>
+                <div class="footer-links">
+                    <a href="https://github.com/tarun7r/antrikshGPT" target="_blank">GitHub</a>
+                    <span class="footer-separator">|</span>
+                    <a href="/credits" target="_blank">API Credits</a>
+                    <span class="footer-separator">|</span>
+                    <span class="powered-by">Powered by Open-Notify, NASA, The Space Devs & more</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h2>Initializing Space Systems...</h2>
+            <p>Connecting to satellite networks</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="/static/script.js"></script>
+</body>
+</html>
