@@ -1,246 +1,129 @@
-# antrikshGPT - AI Space Explorer
+# antrikshGPT - Open-Source AI Space Explorer
 
-> **Antriksh** (अंतरिक्ष) means "space" in Sanskrit/Hindi
+[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen)](https://antrikshgpt.vercel.app/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Vercel Deployment](https://img.shields.io/badge/deploy-vercel-black.svg)](https://vercel.com/)
 
-An impressive AI-powered space exploration webapp that combines cutting-edge AI with real-time space data to create an immersive cosmic experience. This version is optimized for serverless deployment on Vercel.
+> **Antriksh** (अंतरिक्ष) means "space" in Sanskrit/Hindi.
 
-## Quick Start
+**antrikshGPT** is an AI-powered space exploration web application that combines the power of Google's Gemini with real-time space data to create an immersive and educational cosmic experience. This version is optimized for easy, serverless deployment on Vercel.
+
+![antrikshGPT Demo](demo.png)
+
+## ✨ Key Features
+
+- **Conversational AI:** Powered by **Gemini 2.0 Flash** via LangChain for accurate and engaging conversations about space.
+- **Real-Time Space Data:** Integrates with **13 specialized space APIs** to provide live data on:
+  - 🛰️ **ISS Tracking:** Real-time location of the International Space Station.
+  - 🚀 **SpaceX Missions:** Details on upcoming and past launches.
+  - 📰 **Space News:** The latest discoveries and mission updates.
+  - 🧑‍🚀 **Astronaut Tracker:** Who is in space right now.
+  - 🪐 **Planetary Data:** Rich information about celestial bodies in our solar system.
+  - 🔭 **And much more!**
+- **Intelligent Web Search:** A smart fallback mechanism uses DuckDuckGo and Wikipedia to answer a vast range of space-related questions.
+- **Production-Ready:** Built with a smart caching system, rate limiting, and robust error handling to ensure high availability and low latency.
+- **Stunning UI:** A modern, responsive frontend with a beautiful space theme, CSS animations, and real-time updates via WebSockets.
+
+## 🛠️ Technology Stack
+
+- **AI/ML:** Gemini 2.0 Flash, LangChain, LangGraph
+- **Backend:** FastAPI, WebSockets, AsyncIO, AIOHTTP
+- **Frontend:** HTML5, CSS3, JavaScript (ES6+)
+- **Deployment:** Vercel (Serverless)
+- **Authentication:** JWT, passlib, python-jose
+- **Data Sources:** NASA, SpaceX, Launch Library, Open Notify, Wikipedia, DuckDuckGo, and more.
+
+## ⚙️ Getting Started
 
 ### Prerequisites
+
 - Python 3.8+
-- Vercel account and Vercel CLI
-- pip package manager
+- Vercel Account & Vercel CLI
+- `pip` package manager
 
-### Installation & Local Launch
+### Local Development
 
-1. **Clone and navigate to the project:**
-   ```bash
-   git clone https://github.com/your-username/antrikshGPT.git
-   cd antrikshGPT
-   ```
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/your-username/antrikshGPT.git
+    cd antrikshGPT
+    ```
 
-2. **Set up environment variables:**
-   Create a `.env` file from `env.sample` and add your API keys:
-   ```bash
-   cp env.sample .env
-   ```
-   - **`GOOGLE_API_KEY`**: Your Google AI API key for Gemini.
-   - **`SECRET_KEY`**: A secret key for JWT, generate with `openssl rand -hex 32`.
+2.  **Set up environment variables:**
+    Create a `.env` file from the sample and add your API keys.
+    ```bash
+    cp env.sample .env
+    ```
+    - `GOOGLE_API_KEY`: Your Google AI API key for Gemini.
+    - `SECRET_KEY`: A secret key for JWT. Generate one with `openssl rand -hex 32`.
 
-3. **Install dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+3.  **Install dependencies:**
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-4. **Create a default admin user:**
-   The application uses a JSON file (`users.json`) for user management. A default admin user is created automatically with a secure, randomly generated password upon first launch.
-   
-   Check the console output for the admin password when you first run the app.
+4.  **Run the application:**
+    The application uses a `users.json` file for user management. A default admin user is created with a random password on the first launch. Check the console output for the credentials.
+    ```bash
+    cd webapp/backend
+    python3 main.py
+    ```
 
-5. **Start the webapp:**
-   ```bash
-   cd webapp/backend
-   python3 main.py
-   ```
-
-6. **Open your browser and visit:**
-   ```
-   http://localhost:8000
-   ```
-
-   You'll see a stunning space-themed interface that will definitely impress!
+5.  **Open your browser:**
+    Navigate to `http://localhost:8000` to see the application in action.
 
 ### Deployment to Vercel
 
-This app is optimized for serverless deployment on Vercel.
+This application is optimized for serverless deployment on Vercel.
 
-1. **Install Vercel CLI and log in:**
-   ```bash
-   npm install -g vercel
-   vercel login
-   ```
+1.  **Deploy with a single command:**
+    From the project root, run the `vercel` command. Vercel will automatically use the `vercel.json` configuration.
+    ```bash
+    vercel
+    ```
 
-2. **Deploy the app:**
-   Run the `vercel` command from the project root:
-   ```bash
-   vercel
-   ```
-   Vercel will automatically detect the configuration in `vercel.json` and deploy the app.
+2.  **Set Environment Variables in Vercel:**
+    In your Vercel project settings, add the `GOOGLE_API_KEY` and `SECRET_KEY` to the environment variables.
 
-3. **Set environment variables in Vercel:**
-   - Go to your Vercel project settings -> Environment Variables.
-   - Add `GOOGLE_API_KEY` and `SECRET_KEY`.
+## 🚀 Demo Queries
 
-## Demo Queries to Showcase
+Try these queries to see the system's capabilities:
 
-Try these impressive queries to demonstrate the system's capabilities:
+- *"Where is the ISS right now?"*
+- *"What's the next SpaceX launch?"*
+- *"What's the weather like on Mars?"*
+- *"Who is currently in space?"*
+- *"Show me recent photos from the Mars rover."*
+- *"Tell me about black holes."*
 
-### Real-Time Space Data
-- **"Where is the ISS right now?"** - Shows real-time tracking
-- **"What's the next SpaceX launch?"** - Displays upcoming mission details
-- **"What's the weather like on Mars?"** - Mars atmospheric data
-- **"Who is currently in space?"** - Live astronaut information
-- **"Show me Mars rover photos"** - Stunning images from Mars
-- **"Tell me about recent space discoveries"** - Latest space news
-
-### Comprehensive Space Knowledge (Web Search Fallback)
-- **"Tell me about black holes and how they form"** - Astrophysics explanations
-- **"What is the history of NASA?"** - Space agency background
-- **"How do ion drives work in spacecraft?"** - Space technology details
-- **"Tell me about Neil Armstrong"** - Astronaut biographies
-- **"What has the Hubble Space Telescope discovered?"** - Scientific achievements
-- **"What are gravitational waves?"** - Advanced space science topics
-
-## Architecture
-
-### Backend (FastAPI)
-- **FastAPI** server with WebSocket support
-- **LangChain/LangGraph** agent with a robust system prompt and Gemini 2.0 Flash integration
-- **13 MCP (Model Context Protocol) tools** for seamless space data integration
-- **Intelligent Web Search Fallback** for comprehensive space topic coverage
-- **RESTful APIs** and WebSocket endpoints for flexible connectivity
-- **JWT-based Authentication** for secure admin endpoints
-- **Optimized for Serverless** deployment on Vercel
-
-### Frontend (Modern Web)
-- **Pure JavaScript** with modern ES6+ features
-- **CSS3 animations** and space-themed styling
-- **WebSocket client** for real-time updates
-- **Responsive grid layout** with interactive widgets
-- **Progressive enhancement** for optimal performance
-- **Spaceflight News API** for the latest breaking news
-- **The Solar System / Opendata API** for detailed planetary information
-- **JSON file** for simple user database
-
-### Data Sources
-- **NASA APIs** (APOD, Mars Weather, NEOs, Mars Photos)
-- **SpaceX/Launch Library** for mission data
-- **Open Notify** for ISS and astronaut tracking
-- **Spaceflight News API** for latest space news
-- **Solar System API** for planetary information
-- **Wikipedia API** for comprehensive space knowledge
-- **DuckDuckGo Search** for real-time space information fallback
-
-## Project Structure
+## 📁 Project Structure
 
 ```
 antrikshGPT/
 ├── api/
-│   └── index.py                 # Vercel serverless function entrypoint
+│   └── index.py            # Vercel serverless function entrypoint
 ├── config/
-│   ├── __init__.py
-│   └── settings.py              # Configuration and API keys
+│   └── settings.py         # Configuration and API keys
 ├── shared/
-│   ├── __init__.py
-│   ├── langchain_agent.py       # Core AI agent with Gemini and robust error handling
-│   └── space_apis.py            # 13 space API integrations + web search with caching
-├── mcp_server/
-│   ├── __init__.py
-│   └── fastmcp_server.py        # MCP server implementation
+│   ├── langchain_agent.py  # Core AI agent
+│   └── space_apis.py       # Space API integrations
 ├── webapp/
 │   ├── backend/
-│   │   ├── __init__.py
-│   │   └── main.py              # FastAPI server with WebSockets
-│   └── frontend/
-│       ├── index.html           # Beautiful space-themed interface
-│       ├── style.css            # Stunning CSS with animations
-│       ├── script.js            # Interactive JavaScript
-│       └── favicon.ico          # Space-themed favicon
-├── requirements.txt             # Python dependencies
-├── users.json                   # Simple user database
-├── vercel.json                  # Vercel deployment configuration
-└── README.md                    # This file
+│   │   └── main.py         # FastAPI server
+│   └── frontend/           # Static frontend files
+├── requirements.txt        # Python dependencies
+├── users.json              # Simple user database
+├── vercel.json             # Vercel deployment configuration
+└── README.md
 ```
 
-## Features That Will Impress
+## 📜 License
 
-### Advanced AI Assistant
-- **Gemini 2.0 Flash** powered conversational AI for exceptional performance and accuracy
-- **13 Specialized Space Tools** for real-time, accurate data retrieval
-- **Intelligent Web Search Fallback** for comprehensive space knowledge coverage
-- **Multi-Strategy Search** with Wikipedia, DuckDuckGo, and curated knowledge base
-- **Robust Error Handling** with graceful fallbacks and intelligent retries
-- **Context-Aware Responses** for engaging and relevant conversations
-- **Natural language queries** for complex space topics and missions
-
-### Real-Time Space Data
-- **Live ISS Tracking** - Real-time International Space Station location with animated visualization
-- **SpaceX Mission Data** - Current and upcoming launches with detailed mission info
-- **Space News Feed** - Latest space discoveries and mission updates
-- **Astronaut Tracker** - Live count and details of people currently in space
-- **Mars Weather** - Current atmospheric conditions on Mars
-- **NASA APOD** - Daily astronomy picture with explanations
-- **Near Earth Objects** - Asteroid and comet tracking
-- **Solar System Data** - Detailed planetary and celestial body information
-
-### Production-Ready Enhancements
-- **Smart Caching System** - Advanced caching with TTL and rate limiting to reduce latency and API usage
-- **Rate Limit Protection** - Prevents API quota exhaustion and ensures high availability
-- **Fallback Data** and Graceful Degradation when APIs are unavailable
-- **Cache Indicators** - Visual indicators show live vs cached data
-- **Monitoring Endpoints** - Cache statistics and health monitoring for observability
-- **Admin Endpoints** - Secure endpoints for cache management
-- **Background Processing** and intelligent data pre-loading
-- **WebSocket Real-time** updates with cache awareness
-
-## Key Technologies
-
-- **AI/ML:** Gemini 2.0 Flash, LangChain, LangGraph
-- **Backend:** FastAPI, WebSockets, AsyncIO, aiohttp
-- **Frontend:** Modern HTML5/CSS3/ES6+, WebSocket client
-- **Deployment:** Vercel (Serverless)
-- **APIs:** NASA, SpaceX, Launch Library, Open Notify, Wikipedia, DuckDuckGo
-- **Tools:** Python 3.12, MCP (Model Context Protocol)
-- **Authentication:** JWT, passlib, python-jose
-
-## Space Data Coverage
-
-| Data Source | Real-time | Cached | Features |
-|-------------|-----------|---------|----------|
-| ISS Location | Yes (30s) | Yes (5min) | Live tracking, altitude, coordinates |
-| SpaceX Launches | Yes | Yes (5min) | Mission details, status, countdown |
-| NASA APOD | Daily | Yes (1day) | HD images, explanations |
-| Astronauts | Yes | Yes (5min) | Names, spacecraft, count |
-| Mars Weather | Yes | Yes (1hr) | Temperature, pressure, season |
-| Space News | Yes | Yes (5min) | Latest articles, summaries |
-| Planetary Data | Yes | Yes (1day) | Detailed info on planets, moons, etc. |
-| **Web Search Fallback** | Yes | Yes (5min) | Comprehensive space knowledge |
-
-## Configuration
-
-The app uses API keys stored in a `.env` file (create from `env.sample`):
-- **Google AI API** for Gemini 2.0 Flash
-- **NASA API** for space data (optional - uses DEMO_KEY by default)
-- **`SECRET_KEY`** for JWT token encryption
-
-### Other APIs (No Keys Required)
-- **Wikipedia API** - For comprehensive space knowledge
-- **DuckDuckGo Search** - For real-time information fallback
-- **SpaceX/Launch Library** - For mission data
-- **Open Notify** - For ISS and astronaut tracking
-- **Spaceflight News API** - For latest space news
-- **Solar System API** - For planetary information
-
-## Production-Ready Features
-
-- **Smart Caching System** - Advanced caching with TTL and rate limiting
-- **Rate Limit Protection** - Prevents API quota exhaustion
-- **Fallback Data** - Graceful degradation when APIs are unavailable
-- **Cache Indicators** - Visual indicators show live vs cached data
-- **Monitoring Endpoints** - Cache statistics and health monitoring
-- **Secure Admin Actions** - Authenticated endpoint for clearing cache
-- **Background Processing** - Intelligent data pre-loading
-- **WebSocket Real-time** - Live updates with cache awareness
-- **Deployment Ready** - Production configuration included for Vercel
-- **Robust Agent** - Advanced error handling, retries, and system prompt
-- **Web Search API** - Direct access to search functionality via `/api/space-search/{query}`
-
-## License
-
-This project is open source and available under the MIT License.
+This project is open-source and available under the [MIT License](LICENSE).
 
 ---
 
-**Built with love for space exploration and AI innovation**
+**Built with a passion for space exploration and AI innovation.**
 
 *"ऋतं सत्यं परं ब्रह्म।" - "Cosmic order (ṛta) and truth (satya) are the supreme Brahman."*
