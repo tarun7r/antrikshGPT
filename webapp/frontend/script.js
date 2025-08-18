@@ -49,6 +49,7 @@ class AntrikshGPT {
         const charCounter = document.getElementById('char-counter');
         const clearChatButton = document.getElementById('clear-chat-button');
         const chatMessages = document.getElementById('chat-messages');
+        const scrollBottomBtn = document.getElementById('scroll-bottom');
 
         if (clearChatButton) {
             clearChatButton.addEventListener('click', () => this.clearChat());
@@ -106,6 +107,26 @@ class AntrikshGPT {
                 this.demoToolCall();
             }
         });
+
+        // Scroll to bottom button visibility
+        if (chatMessages && scrollBottomBtn) {
+            const toggleScrollBtn = () => {
+                const nearBottom = chatMessages.scrollHeight - chatMessages.scrollTop - chatMessages.clientHeight < 80;
+                if (nearBottom) {
+                    scrollBottomBtn.classList.remove('show');
+                } else {
+                    scrollBottomBtn.classList.add('show');
+                }
+            };
+
+            chatMessages.addEventListener('scroll', toggleScrollBtn);
+            scrollBottomBtn.addEventListener('click', () => {
+                chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
+            });
+
+            // Initial state
+            toggleScrollBtn();
+        }
     }
 
     /**
@@ -246,26 +267,6 @@ class AntrikshGPT {
         if (!event) {
             console.error('❌ Received a null or undefined tool call event');
             return;
-        }
-
-        // Scroll to bottom button visibility
-        if (chatMessages && scrollBottomBtn) {
-            const toggleScrollBtn = () => {
-                const nearBottom = chatMessages.scrollHeight - chatMessages.scrollTop - chatMessages.clientHeight < 80;
-                if (nearBottom) {
-                    scrollBottomBtn.classList.remove('show');
-                } else {
-                    scrollBottomBtn.classList.add('show');
-                }
-            };
-
-            chatMessages.addEventListener('scroll', toggleScrollBtn);
-            scrollBottomBtn.addEventListener('click', () => {
-                chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
-            });
-
-            // Initial state
-            toggleScrollBtn();
         }
 
         console.log('🔧 Tool call event received from backend:', event);

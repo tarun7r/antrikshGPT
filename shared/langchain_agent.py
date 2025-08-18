@@ -70,7 +70,7 @@ class SpaceGPTAgent:
             
             # Store configuration for recreating LLM client when needed
             self.llm_config = {
-                "model": "gemini-2.0-flash",
+                "model": "gemini-2.5-flash",
                 "google_api_key": os.getenv("GOOGLE_API_KEY"),
                 "temperature": 0.7,
                 "timeout": 30,
