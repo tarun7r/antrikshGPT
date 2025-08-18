@@ -302,8 +302,17 @@ async def catch_exceptions_middleware(request: Request, call_next):
         )
 
 
-# Mount static files
-app.mount("/static", StaticFiles(directory="webapp/frontend"), name="static")
+# Mount static files with cache headers disabled to avoid stale assets in dev
+class NoCacheStaticFiles(StaticFiles):
+    async def get_response(self, path, scope):
+        response = await super().get_response(path, scope)
+        # Disable caching for easier development and to fix stale-script issues
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
+
+app.mount("/static", NoCacheStaticFiles(directory="webapp/frontend"), name="static")
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -336,6 +345,19 @@ async def favicon():
 async def chat_endpoint(chat_data: ChatMessage):
     """Chat endpoint for the SpaceGPT agent."""
     try:
+        # Collect tool call events for serverless (no websockets)
+        collected_events: List[Dict] = []
+
+        def http_tool_call_callback(event):
+            # Store a shallow copy to avoid mutation issues
+            try:
+                collected_events.append(dict(event))
+            except Exception:
+                collected_events.append({"type": "unknown"})
+
+        # Temporarily subscribe to tool call events for this request
+        spacegpt_agent.add_tool_call_callback(http_tool_call_callback)
+
         # Debug logging for chat history
         if chat_data.chat_history:
             logger.info(f"Received chat history with {len(chat_data.chat_history)} messages")
@@ -347,10 +369,12 @@ async def chat_endpoint(chat_data: ChatMessage):
             message=chat_data.message,
             chat_history=chat_data.chat_history
         )
+
         return {
             "response": response,
             "timestamp": datetime.now().isoformat(),
-            "status": "success"
+            "status": "success",
+            "tool_call_events": collected_events,
         }
     except Exception as e:
         logger.error(f"Chat endpoint error: {str(e)}")

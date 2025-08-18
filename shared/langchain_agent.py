@@ -314,7 +314,7 @@ class SpaceGPTAgent:
         # Web Search tool
         tools.append(MCPTool(
             name="web_search",
-            description="Used to find information on space agencies that are NOT SpaceX. This includes NASA, ESA, ISRO, Roscosmos, and others. You MUST use this tool for queries like 'NASA's next mission' or 'ISRO's upcoming launches'.",
+            description="Search the web for space and astronomy topics (missions, agencies, news).",
             tool_func=space_api.web_search,
             schema={
                 "query": (str, ...),
@@ -356,11 +356,17 @@ class SpaceGPTAgent:
                 for tool in self.tools:
                     if tool.name == tool_name:
                         # Emit tool call start event with the correct description
+                        # Provide a clearer, user-friendly description specifically for web_search
+                        display_description = (tool.description or f"Accessing {tool_name}")
+                        if tool_name == "web_search":
+                            query_arg = tool_args.get("query") if isinstance(tool_args, dict) else None
+                            if isinstance(query_arg, str) and query_arg.strip():
+                                display_description = f"Web search: \"{query_arg}\""
                         await self._emit_tool_call_event(
                             'tool_call_start',
                             tool_name,
                             tool_id,
-                            description=tool.description or f"Accessing {tool_name}",
+                            description=display_description,
                             args=tool_args
                         )
                         

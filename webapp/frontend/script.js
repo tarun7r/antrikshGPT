@@ -567,6 +567,18 @@ class AntrikshGPT {
                     const data = await response.json();
                     this.hideTypingIndicator();
                     this.addMessageToChat(data.response, 'assistant');
+
+                    // Render tool call events when using HTTP (serverless)
+                    if (Array.isArray(data.tool_call_events)) {
+                        data.tool_call_events.forEach((evt) => {
+                            if (!evt || !evt.type) return;
+                            if (evt.type === 'tool_call_start') {
+                                this.startToolCall(evt.tool_name, evt.description || `Executing ${evt.tool_name}`, evt.tool_id);
+                            } else if (evt.type === 'tool_call_complete') {
+                                this.completeToolCall(evt.tool_id, evt.result || evt.error);
+                            }
+                        });
+                    }
                 } else {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
