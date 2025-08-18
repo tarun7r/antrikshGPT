@@ -61,6 +61,8 @@ class SpaceGPTAgent:
     
     def __init__(self):
         """Initialize the SpaceGPT agent with enhanced error handling and validation."""
+        # Tool call callback system for real-time notifications
+        self.tool_call_callbacks = []
         try:
             # Validate settings
             if not settings.google_api_key:
@@ -98,6 +100,39 @@ class SpaceGPTAgent:
             raise RuntimeError(f"Failed to initialize SpaceGPT agent: {str(e)}")
         
         # Note: Graph initialization temporarily removed due to LangGraph compatibility issues
+    
+    def add_tool_call_callback(self, callback):
+        """Add a callback function to be called when tool calls start/end."""
+        self.tool_call_callbacks.append(callback)
+        logger.info(f"🔧 Added tool call callback, total callbacks: {len(self.tool_call_callbacks)}")
+    
+    def remove_tool_call_callback(self, callback):
+        """Remove a tool call callback."""
+        if callback in self.tool_call_callbacks:
+            self.tool_call_callbacks.remove(callback)
+    
+    async def _emit_tool_call_event(self, event_type: str, tool_name: str, tool_id: str, **kwargs):
+        """Emit tool call events to all registered callbacks."""
+        event = {
+            'type': event_type,
+            'tool_name': tool_name,
+            'tool_id': tool_id,
+            'timestamp': datetime.now().isoformat(),
+            **kwargs
+        }
+        
+        logger.info(f"🔧 Emitting tool call event: {event_type} for {tool_name} to {len(self.tool_call_callbacks)} callbacks")
+        
+        for i, callback in enumerate(self.tool_call_callbacks):
+            try:
+                if asyncio.iscoroutinefunction(callback):
+                    await callback(event)
+                    logger.info(f"✅ Async callback {i} executed successfully")
+                else:
+                    callback(event)
+                    logger.info(f"✅ Sync callback {i} executed successfully")
+            except Exception as e:
+                logger.error(f"❌ Error in tool call callback {i}: {str(e)}")
     
     async def cleanup(self):
         """Clean up resources, especially for serverless environments."""
@@ -320,6 +355,15 @@ class SpaceGPTAgent:
                 tool_executed = False
                 for tool in self.tools:
                     if tool.name == tool_name:
+                        # Emit tool call start event with the correct description
+                        await self._emit_tool_call_event(
+                            'tool_call_start',
+                            tool_name,
+                            tool_id,
+                            description=tool.description or f"Accessing {tool_name}",
+                            args=tool_args
+                        )
+                        
                         try:
                             # Validate arguments before execution
                             validated_args = self._validate_tool_args(tool, tool_args)
@@ -337,6 +381,15 @@ class SpaceGPTAgent:
                                 tool_messages.append(tool_message)
                                 tool_executed = True
                                 logger.info(f"Tool {tool_name} executed successfully")
+                                
+                                # Emit tool call completion event
+                                await self._emit_tool_call_event(
+                                    'tool_call_complete',
+                                    tool_name,
+                                    tool_id,
+                                    result=result[:500] if result else "Success",  # Truncate result for event
+                                    status='success'
+                                )
                             else:
                                 # Handle empty or invalid results
                                 error_message = ToolMessage(
@@ -361,6 +414,15 @@ class SpaceGPTAgent:
                             tool_messages.append(error_message)
                             tool_executed = True
                             logger.error(f"Tool {tool_name} execution failed: {str(e)}")
+                            
+                            # Emit tool call error event
+                            await self._emit_tool_call_event(
+                                'tool_call_complete',
+                                tool_name,
+                                tool_id,
+                                error=str(e),
+                                status='error'
+                            )
                             break
                 
                 if not tool_executed:

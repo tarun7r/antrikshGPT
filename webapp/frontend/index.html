@@ -69,10 +69,11 @@
                         <div class="chat-header-title">
                             <h2>👨‍🚀 antrikshGPT Assistant</h2>
                         </div>
+                        <button id="clear-chat-button" class="clear-chat-button" aria-label="Clear chat" title="Clear chat">×</button>
                         <p>Your AI-powered space exploration companion</p>
                     </div>
                     
-                    <div class="chat-messages" id="chat-messages">
+                    <div class="chat-messages" id="chat-messages" aria-live="polite" aria-atomic="false">
                         <div class="message assistant-message welcome-message">
                             <div class="message-avatar">🚀</div>
                             <div class="message-content">
@@ -134,6 +135,22 @@
                     <div class="widget-content">
                         <div id="neo-content">
                             <div class="loading">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tool Call Indicator -->
+                <div class="widget tool-call-widget">
+                    <div class="widget-header">
+                        <h3>🔧 Active Tool Calls</h3>
+                        <div class="tool-call-status" id="tool-call-status"></div>
+                    </div>
+                    <div class="widget-content">
+                        <div id="tool-call-content">
+                            <div class="tool-call-idle">
+                                <div class="idle-indicator">💤</div>
+                                <div class="idle-text">No active tool calls</div>
+                            </div>
                         </div>
                     </div>
                 </div>

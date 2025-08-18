@@ -11,6 +11,8 @@ class AntrikshGPT {
         this.retryCount = 0;
         this.maxRetries = 5;
         this.updateIntervals = {};
+        this.activeToolCalls = new Map();
+        this.toolCallHistory = [];
         
         this.init();
     }
@@ -46,6 +48,7 @@ class AntrikshGPT {
         const sendButton = document.getElementById('send-button');
         const charCounter = document.getElementById('char-counter');
         const clearChatButton = document.getElementById('clear-chat-button');
+        const chatMessages = document.getElementById('chat-messages');
 
         if (clearChatButton) {
             clearChatButton.addEventListener('click', () => this.clearChat());
@@ -95,6 +98,14 @@ class AntrikshGPT {
         
         // Auto-refresh data every 30 seconds
         this.setupAutoRefresh();
+        
+        // Add demo tool call functionality (Ctrl+T for testing)
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 't') {
+                e.preventDefault();
+                this.demoToolCall();
+            }
+        });
     }
 
     /**
@@ -171,6 +182,8 @@ class AntrikshGPT {
      * Handle WebSocket messages
      */
     handleWebSocketMessage(data) {
+        console.log('📨 WebSocket message received:', data.type, data);
+        
         switch (data.type) {
             case 'welcome':
                 console.log('Welcome message:', data.message);
@@ -191,6 +204,10 @@ class AntrikshGPT {
             
             case 'chat_response_end':
                 this.finalizeMessage();
+                break;
+            
+            case 'tool_call_event':
+                this.handleToolCallEvent(data.event); // Correctly access nested event data
                 break;
                 
             case 'error':
@@ -223,6 +240,283 @@ class AntrikshGPT {
     }
 
     /**
+     * Handle real tool call events from backend
+     */
+    handleToolCallEvent(event) {
+        if (!event) {
+            console.error('❌ Received a null or undefined tool call event');
+            return;
+        }
+
+        // Scroll to bottom button visibility
+        if (chatMessages && scrollBottomBtn) {
+            const toggleScrollBtn = () => {
+                const nearBottom = chatMessages.scrollHeight - chatMessages.scrollTop - chatMessages.clientHeight < 80;
+                if (nearBottom) {
+                    scrollBottomBtn.classList.remove('show');
+                } else {
+                    scrollBottomBtn.classList.add('show');
+                }
+            };
+
+            chatMessages.addEventListener('scroll', toggleScrollBtn);
+            scrollBottomBtn.addEventListener('click', () => {
+                chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
+            });
+
+            // Initial state
+            toggleScrollBtn();
+        }
+
+        console.log('🔧 Tool call event received from backend:', event);
+        
+        if (event.type === 'tool_call_start') {
+            console.log(`📥 Starting tool call: ${event.tool_name} (ID: ${event.tool_id})`);
+            const toolCallId = this.startToolCall(
+                event.tool_name, 
+                event.description || `Executing ${event.tool_name}`, 
+                event.tool_id
+            );
+        } else if (event.type === 'tool_call_complete') {
+            console.log(`📥 Completing tool call: ${event.tool_name} (ID: ${event.tool_id})`);
+            this.completeToolCall(event.tool_id, event.result || event.error);
+        } else {
+            console.warn('🔧 Unknown tool call event type:', event.type);
+        }
+    }
+
+    /**
+     * Tool Call Management Methods
+     */
+    
+    /**
+     * Start tracking a tool call
+     */
+    startToolCall(toolName, description, id = null) {
+        const toolCallId = id || `tool_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        
+        // Check if this tool call already exists (in case of duplicate events)
+        if (this.activeToolCalls.has(toolCallId)) {
+            console.log(`🔧 Tool call ${toolName} already exists, skipping duplicate start event`);
+            return toolCallId;
+        }
+        
+        const toolCall = {
+            id: toolCallId,
+            name: toolName,
+            description: description,
+            startTime: Date.now(),
+            status: 'active'
+        };
+        
+        console.log(`🔧 Starting tool call: ${toolName} (ID: ${toolCallId})`);
+        this.activeToolCalls.set(toolCallId, toolCall);
+        console.log('🗺️ Map after add:', new Map(this.activeToolCalls));
+        this.updateToolCallWidget();
+        
+        return toolCallId;
+    }
+    
+    /**
+     * Complete a tool call
+     */
+    completeToolCall(toolCallId, result = null) {
+        const toolCall = this.activeToolCalls.get(toolCallId);
+        console.log(`🔍 Completing tool call for ID: ${toolCallId}. Found tool:`, toolCall);
+
+        if (toolCall && toolCall.status !== 'completed') { // Prevent multiple completions
+            toolCall.status = 'completed';
+            toolCall.endTime = Date.now();
+            toolCall.duration = toolCall.endTime - toolCall.startTime;
+            toolCall.result = result;
+            
+            this.updateToolCallWidget(); // Re-render to show completed state
+            
+            console.log(`✅ Completed tool call: ${toolCall.name} (${toolCall.duration}ms)`);
+            
+            // Remove from display after a delay
+            setTimeout(() => {
+                const itemEl = document.querySelector(`.tool-call-item[data-id="${toolCallId}"]`);
+                if (itemEl) {
+                    itemEl.style.animation = 'tool-call-item-exit 0.5s ease forwards';
+                    
+                    itemEl.addEventListener('animationend', () => {
+                        if (this.activeToolCalls.has(toolCallId)) {
+                            // Move to history
+                            this.toolCallHistory.push(this.activeToolCalls.get(toolCallId));
+                            this.activeToolCalls.delete(toolCallId);
+                            console.log('🗺️ Map after delete:', new Map(this.activeToolCalls));
+                            
+                            // Keep only last 10 in history
+                            if (this.toolCallHistory.length > 10) {
+                                this.toolCallHistory = this.toolCallHistory.slice(-10);
+                            }
+                            
+                            this.updateToolCallWidget(); // Re-render to remove the item
+                        }
+                    });
+                } else {
+                     // Fallback if element not found
+                    if (this.activeToolCalls.has(toolCallId)) {
+                        this.activeToolCalls.delete(toolCallId);
+                        this.updateToolCallWidget();
+                    }
+                }
+            }, 2000); // Keep completed item on screen for 2 seconds
+        }
+    }
+    
+    /**
+     * Update the tool call widget display
+     */
+    updateToolCallWidget() {
+        const widget = document.querySelector('.tool-call-widget');
+        const status = document.getElementById('tool-call-status');
+        const content = document.getElementById('tool-call-content');
+        
+        if (!widget || !status || !content) {
+            console.error('Tool call widget DOM elements not found!');
+            return;
+        }
+        
+        const hasActiveCalls = this.activeToolCalls.size > 0;
+        console.log(`📊 Updating widget. Has active calls: ${hasActiveCalls}. Calls:`, new Map(this.activeToolCalls));
+        
+        // Update widget state
+        if (hasActiveCalls) {
+            widget.classList.add('active');
+            status.className = 'tool-call-status active';
+        } else {
+            widget.classList.remove('active');
+            status.className = 'tool-call-status idle';
+        }
+        
+        // Update content
+        if (hasActiveCalls) {
+            const activeCallsHtml = Array.from(this.activeToolCalls.values()).map(toolCall => {
+                const isCompleted = toolCall.status === 'completed';
+                const completedClass = isCompleted ? 'completed' : '';
+                const progressIndicator = isCompleted
+                    ? `<div class="tool-call-completed-icon">✅</div>`
+                    : `<div class="tool-call-progress"></div>`;
+
+                return `
+                    <div class="tool-call-item ${completedClass}" data-id="${toolCall.id}">
+                        <div class="tool-call-icon" aria-hidden="true">${this.getToolIcon(toolCall.name)}</div>
+                        <div class="tool-call-info">
+                            <div class="tool-call-name">${toolCall.name}</div>
+                            <div class="tool-call-description">${toolCall.description}</div>
+                        </div>
+                        ${progressIndicator}
+                    </div>
+                `;
+            }).join('');
+            
+            content.innerHTML = `<div class="tool-call-active">${activeCallsHtml}</div>`;
+        } else {
+            content.innerHTML = `
+                <div class="tool-call-idle">
+                    <div class="idle-indicator">💤</div>
+                    <div class="idle-text">No active tool calls</div>
+                </div>
+            `;
+        }
+    }
+    
+    /**
+     * Get appropriate icon for tool name
+     */
+    getToolIcon(toolName) {
+        const iconMap = {
+            // Backend space API tools
+            'get_iss_location': '🛰️',
+            'get_spacex_launches': '🚀',
+            'get_people_in_space': '👨‍🚀',
+            'get_mars_weather': '🔴',
+            'get_space_news': '📰',
+            'get_near_earth_objects': '🌍',
+            'get_apod': '📸',
+            'get_space_weather': '☀️',
+            
+            // Code tools
+            'codebase_search': '🔍',
+            'grep': '📄',
+            'read_file': '📖',
+            'write': '✏️',
+            'search_replace': '🔄',
+            'run_terminal_cmd': '💻',
+            'list_dir': '📁',
+            'web_search': '🌐',
+            'create_diagram': '📊',
+            'fetch_pull_request': '🔗',
+            'delete_file': '🗑️',
+            'edit_notebook': '📓',
+            'multi_edit': '✂️',
+            'todo_write': '📝',
+            'read_lints': '🔧',
+            'glob_file_search': '🔎'
+        };
+        
+        return iconMap[toolName] || '🛠️';
+    }
+    
+    /**
+     * Simulate tool call from chat interactions (for demo purposes)
+     */
+    simulateToolCallsFromMessage(message) {
+        // This method can be enhanced to detect and simulate tool calls based on message content
+        const lowerMessage = message.toLowerCase();
+        
+        if (lowerMessage.includes('search') || lowerMessage.includes('find')) {
+            const toolCallId = this.startToolCall('codebase_search', 'Searching through codebase for relevant information');
+            
+            // Complete after random delay (1-3 seconds)
+            setTimeout(() => {
+                this.completeToolCall(toolCallId);
+            }, Math.random() * 2000 + 1000);
+        }
+        
+        if (lowerMessage.includes('file') || lowerMessage.includes('read')) {
+            const toolCallId = this.startToolCall('read_file', 'Reading file contents');
+            
+            setTimeout(() => {
+                this.completeToolCall(toolCallId);
+            }, Math.random() * 1500 + 500);
+        }
+        
+        if (lowerMessage.includes('web') || lowerMessage.includes('internet') || lowerMessage.includes('online')) {
+            const toolCallId = this.startToolCall('web_search', 'Searching the web for information');
+            
+            setTimeout(() => {
+                this.completeToolCall(toolCallId);
+            }, Math.random() * 3000 + 1000);
+        }
+    }
+    
+    /**
+     * Demo tool call functionality (for testing)
+     */
+    demoToolCall() {
+        const tools = [
+            { name: 'codebase_search', description: 'Searching for authentication methods' },
+            { name: 'read_file', description: 'Reading configuration file' },
+            { name: 'web_search', description: 'Looking up latest API documentation' },
+            { name: 'grep', description: 'Finding function definitions' },
+            { name: 'run_terminal_cmd', description: 'Running tests' }
+        ];
+        
+        const randomTool = tools[Math.floor(Math.random() * tools.length)];
+        const toolCallId = this.startToolCall(randomTool.name, randomTool.description);
+        
+        // Complete after 2-4 seconds
+        setTimeout(() => {
+            this.completeToolCall(toolCallId, 'Demo completed successfully');
+        }, Math.random() * 2000 + 2000);
+        
+        this.showNotification(`Demo tool call started: ${randomTool.name}`, 'info');
+    }
+
+    /**
      * Send chat message
      */
     async sendMessage() {
@@ -233,6 +527,11 @@ class AntrikshGPT {
         
         // Add user message to chat
         this.addMessageToChat(message, 'user');
+        
+        // Only simulate tool calls if WebSocket is not connected (fallback)
+        if (!this.isConnected || this.ws.readyState !== WebSocket.OPEN) {
+            this.simulateToolCallsFromMessage(message);
+        }
         
         // Clear input and reset height
         chatInput.value = '';
@@ -279,7 +578,7 @@ class AntrikshGPT {
     }
 
     /**
-     * Add message to chat
+     * Add message to chat with enhanced animations
      */
     addMessageToChat(message, sender) {
         const chatMessages = document.getElementById('chat-messages');
@@ -287,6 +586,10 @@ class AntrikshGPT {
 
         const messageEl = document.createElement('div');
         messageEl.className = `message ${sender}-message`;
+        
+        // Add initial opacity for smooth animation
+        messageEl.style.opacity = '0';
+        messageEl.style.transform = sender === 'user' ? 'translateX(30px)' : 'translateX(-30px)';
 
         const avatar = document.createElement('div');
         avatar.className = 'message-avatar';
@@ -309,7 +612,18 @@ class AntrikshGPT {
         messageEl.appendChild(contentWrapper);
         chatMessages.appendChild(messageEl);
 
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+        // Smooth scroll to bottom
+        chatMessages.scrollTo({
+            top: chatMessages.scrollHeight,
+            behavior: 'smooth'
+        });
+
+        // Trigger animation
+        requestAnimationFrame(() => {
+            messageEl.style.opacity = '1';
+            messageEl.style.transform = 'translateX(0)';
+            messageEl.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+        });
 
         this.chatHistory.push({
             role: sender === 'user' ? 'user' : 'assistant',
@@ -516,6 +830,9 @@ class AntrikshGPT {
         
         // Initialize static data
         this.initializeStaticWidgets();
+        
+        // Initialize tool call widget
+        this.updateToolCallWidget();
     }
 
     /**
@@ -922,22 +1239,41 @@ class AntrikshGPT {
     }
 
     /**
-     * Show error in widget
+     * Show error in widget with better styling
      */
     showError(elementId, message) {
         const element = document.getElementById(elementId);
         if (element) {
-            element.innerHTML = `<div style="color: var(--space-pink); text-align: center; padding: 1rem;">${message}</div>`;
+            element.innerHTML = `
+                <div style="
+                    color: var(--space-pink); 
+                    text-align: center; 
+                    padding: 1.5rem;
+                    background: rgba(255, 0, 110, 0.1);
+                    border: 1px solid rgba(255, 0, 110, 0.3);
+                    border-radius: 8px;
+                    font-size: 0.9rem;
+                    animation: fadeIn 0.3s ease;
+                ">
+                    <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">⚠️</div>
+                    ${message}
+                </div>
+            `;
         }
     }
 
     /**
-     * Show loading overlay
+     * Show loading overlay with enhanced animation
      */
     showLoadingOverlay() {
         const overlay = document.getElementById('loading-overlay');
         if (overlay) {
             overlay.style.display = 'flex';
+            overlay.style.opacity = '0';
+            requestAnimationFrame(() => {
+                overlay.style.opacity = '1';
+                overlay.style.transition = 'opacity 0.3s ease';
+            });
         }
     }
 

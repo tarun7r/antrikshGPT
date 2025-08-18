@@ -407,6 +407,24 @@ async def get_space_data(data_type: str):
 async def websocket_endpoint(websocket: WebSocket):
     """WebSocket endpoint for real-time communication (limited in serverless)."""
     await manager.connect(websocket)
+    
+    # Tool call event handler for this WebSocket connection
+    async def tool_call_event_handler(event):
+        """Forward tool call events to the WebSocket client."""
+        try:
+            logger.info(f"🔧 Forwarding tool call event to WebSocket: {event}")
+            await manager.send_personal_message(json.dumps({
+                "type": "tool_call_event",
+                "event": event,
+                "timestamp": datetime.now().isoformat()
+            }), websocket)
+            logger.info(f"✅ Tool call event sent successfully")
+        except Exception as e:
+            logger.error(f"❌ Error sending tool call event to WebSocket: {str(e)}")
+    
+    # Register the callback with the spacegpt agent
+    spacegpt_agent.add_tool_call_callback(tool_call_event_handler)
+    
     try:
         # Send initial welcome message
         await manager.send_personal_message(json.dumps({
@@ -457,6 +475,8 @@ async def websocket_endpoint(websocket: WebSocket):
                 }), websocket)
     except WebSocketDisconnect:
         manager.disconnect(websocket)
+        # Unregister the tool call callback
+        spacegpt_agent.remove_tool_call_callback(tool_call_event_handler)
 
 
 @app.post("/api/login")
