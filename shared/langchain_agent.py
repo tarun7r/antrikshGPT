@@ -276,14 +276,14 @@ class SpaceGPTAgent:
             }
         ))
         
-        # Web Search tool (fallback for space queries not covered by specific tools)
+        # Web Search tool
         tools.append(MCPTool(
-            name="web_search_space",
-            description="Search the web for space-related information. Use this as a fallback when specific space data tools don't cover the user's query. Only use for space, astronomy, or space exploration related queries.",
-            tool_func=space_api.web_search_space,
+            name="web_search",
+            description="Used to find information on space agencies that are NOT SpaceX. This includes NASA, ESA, ISRO, Roscosmos, and others. You MUST use this tool for queries like 'NASA's next mission' or 'ISRO's upcoming launches'.",
+            tool_func=space_api.web_search,
             schema={
                 "query": (str, ...),
-                "num_results": (int, 5)
+                "max_results": (int, 5)
             }
         ))
         
@@ -461,6 +461,9 @@ class SpaceGPTAgent:
                             except ValueError:
                                 logger.warning(f"Invalid int value for {field_name}: {value}")
                                 continue
+                        elif field_type == int and isinstance(value, (int, float)):
+                            # Handle both int and float values for int fields
+                            validated_args[field_name] = int(value)
                         elif field_type == str and isinstance(value, str):
                             validated_args[field_name] = value.strip()
                         else:
@@ -519,7 +522,10 @@ class SpaceGPTAgent:
             "storm": ["get_space_weather"],
             "exoplanet": ["get_exoplanet_info"],
             "asteroid": ["get_near_earth_objects"],
-            "neo": ["get_near_earth_objects"]
+            "neo": ["get_near_earth_objects"],
+            "search": ["web_search"],
+            "history": ["web_search"],
+            "biography": ["web_search"]
         }
         
         for keyword, tool_list in suggestions.items():
@@ -632,6 +638,10 @@ class SpaceGPTAgent:
 ## MANDATORY TOOL USAGE RULES
 You MUST call the appropriate tool(s) for these query types:
 
+**NASA, ESA, ISRO & Other Space Agencies:**
+- You MUST use the `web_search` tool for ANY question about a space agency that is not SpaceX.
+- When the user asks about a mission, formulate a concise and effective search query. For example, for "ISRO's next mission details", a good query would be `web_search(query="ISRO upcoming missions")`. Do not ask for permission to search.
+
 **SpaceX & Launch Related:**
 - ANY SpaceX question → get_spacex_next_launch() OR get_spacex_launches(limit)
 - "Next launch", "upcoming mission" → get_spacex_next_launch()
@@ -673,7 +683,7 @@ You MUST call the appropriate tool(s) for these query types:
 - "Asteroids", "NEOs", "near Earth objects" → get_near_earth_objects() - If no date is provided, **DEFAULT TO THE NEXT 7 DAYS**
 
 **Fallback Web Search:**
-- For space-related queries NOT covered by the above tools → web_search_space(query, num_results)
+
 - Use for topics like: space history, space agencies, space technology, astronaut biographies, space missions not covered by SpaceX, theoretical physics related to space, space science concepts, etc.
 - ONLY use web search for space/astronomy related queries - never for non-space topics
 
@@ -694,7 +704,8 @@ You MUST call the appropriate tool(s) for these query types:
 - get_solar_system_body(body_id) - Detailed solar system body information
 - get_space_weather(start_date, end_date) - Space weather news (solar storms, CMEs, auroras)
 - get_exoplanet_info(planet_name) - Exoplanet information and recent discoveries
-- web_search_space(query, num_results) - Web search for space topics not covered by specific tools (fallback only)
+- web_search(query, max_results) - Web search for space/astronomy topics (default max_results: 5)
+
 
 ## RESPONSE PROTOCOL
 1. **ANALYZE** the user's question to identify required tools
@@ -738,14 +749,21 @@ Remember: You are SpaceGPT - the most current and accurate space information ass
             system_msg = SystemMessage(content=system_prompt)
             messages.append(system_msg)
             
-            # Process chat history with validation
+            # Process chat history with validation and debugging
             if chat_history and isinstance(chat_history, list):
+                logger.info(f"Processing chat history with {len(chat_history)} messages")
                 for msg in chat_history[-10:]:  # Limit to last 10 messages to prevent context overflow
                     if isinstance(msg, dict) and "role" in msg and "content" in msg:
                         if msg["role"] == "user" and msg["content"].strip():
+                            logger.debug(f"Adding user message to context: {msg['content'][:50]}...")
                             messages.append(HumanMessage(content=msg["content"].strip()))
                         elif msg["role"] == "assistant" and msg["content"].strip():
+                            logger.debug(f"Adding assistant message to context: {msg['content'][:50]}...")
                             messages.append(AIMessage(content=msg["content"].strip()))
+                    else:
+                        logger.warning(f"Invalid message format in chat history: {msg}")
+            else:
+                logger.info("No chat history provided or invalid format")
             
             # Add current message
             messages.append(HumanMessage(content=message))

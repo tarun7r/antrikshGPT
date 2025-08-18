@@ -336,6 +336,13 @@ async def favicon():
 async def chat_endpoint(chat_data: ChatMessage):
     """Chat endpoint for the SpaceGPT agent."""
     try:
+        # Debug logging for chat history
+        if chat_data.chat_history:
+            logger.info(f"Received chat history with {len(chat_data.chat_history)} messages")
+            logger.debug(f"Chat history structure: {[msg.get('role', 'unknown') for msg in chat_data.chat_history]}")
+        else:
+            logger.info("No chat history received")
+            
         response = await spacegpt_agent.chat(
             message=chat_data.message,
             chat_history=chat_data.chat_history
@@ -346,6 +353,7 @@ async def chat_endpoint(chat_data: ChatMessage):
             "status": "success"
         }
     except Exception as e:
+        logger.error(f"Chat endpoint error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Chat error: {str(e)}")
 
 
@@ -413,8 +421,16 @@ async def websocket_endpoint(websocket: WebSocket):
             try:
                 message_data = json.loads(data)
                 if message_data.get("type") == "chat":
-                    # Process chat message
-                    response = await spacegpt_agent.chat(message_data.get("message", ""))
+                    # Process chat message with history
+                    chat_history = message_data.get("chat_history", [])
+                    logger.info(f"WebSocket: Received chat message with {len(chat_history)} history messages")
+                    if chat_history:
+                        logger.debug(f"WebSocket chat history structure: {[msg.get('role', 'unknown') for msg in chat_history]}")
+                    
+                    response = await spacegpt_agent.chat(
+                        message=message_data.get("message", ""),
+                        chat_history=chat_history
+                    )
                     await manager.send_personal_message(json.dumps({
                         "type": "chat_response",
                         "message": response,
@@ -485,31 +501,7 @@ async def get_cache_stats():
     }
 
 
-@app.get("/api/space-search/{query}")
-async def space_search(query: str, num_results: int = 5):
-    """Web search for space-related queries as a fallback."""
-    try:
-        data = await cache_manager.get_data(
-            f"web_search_{query}_{num_results}", 
-            space_api.web_search_space,
-            query=query,
-            num_results=num_results
-        )
-        return {
-            "data": data,
-            "timestamp": datetime.now().isoformat(),
-            "type": "space_search",
-            "query": query,
-            "cached": data.get("cached", False)
-        }
-    except Exception as e:
-        return {
-            "data": {"error": f"Search failed: {str(e)}", "query": query},
-            "timestamp": datetime.now().isoformat(),
-            "type": "space_search",
-            "query": query,
-            "cached": False
-        }
+
 
 
 @app.post("/api/cache/clear")
@@ -521,6 +513,30 @@ async def clear_cache(current_user: User = Depends(get_current_user)):
         "status": "Cache cleared successfully",
         "timestamp": datetime.now().isoformat()
     }
+
+
+@app.post("/api/debug/chat-history")
+async def debug_chat_history(chat_data: ChatMessage):
+    """Debug endpoint to test chat history processing without calling the AI."""
+    debug_info = {
+        "message": chat_data.message,
+        "chat_history_received": chat_data.chat_history is not None,
+        "chat_history_length": len(chat_data.chat_history) if chat_data.chat_history else 0,
+        "chat_history_structure": [],
+        "timestamp": datetime.now().isoformat()
+    }
+    
+    if chat_data.chat_history:
+        for i, msg in enumerate(chat_data.chat_history):
+            debug_info["chat_history_structure"].append({
+                "index": i,
+                "role": msg.get("role", "missing"),
+                "content_length": len(msg.get("content", "")) if msg.get("content") else 0,
+                "has_timestamp": "timestamp" in msg,
+                "content_preview": msg.get("content", "")[:50] + "..." if msg.get("content", "") else "empty"
+            })
+    
+    return debug_info
 
 
 if __name__ == "__main__":

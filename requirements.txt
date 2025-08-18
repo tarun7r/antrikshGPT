@@ -26,3 +26,4 @@ python-jose[cryptography]
 passlib[bcrypt]
 # Added for logging
 structlog
+ddgs

@@ -247,7 +247,8 @@ class AntrikshGPT {
             if (this.isConnected && this.ws.readyState === WebSocket.OPEN) {
                 this.ws.send(JSON.stringify({
                     type: 'chat',
-                    message: message
+                    message: message,
+                    chat_history: this.chatHistory.slice(-10) // Include chat history
                 }));
             } else {
                 // Fallback to HTTP API
@@ -339,6 +340,34 @@ class AntrikshGPT {
         
         // Show notification
         this.showNotification('Chat cleared', 'info');
+    }
+
+    /**
+     * Debug function to test chat history
+     */
+    async debugChatHistory() {
+        try {
+            const response = await fetch('/api/debug/chat-history', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: "Debug test message",
+                    chat_history: this.chatHistory.slice(-10)
+                })
+            });
+            
+            if (response.ok) {
+                const debug_data = await response.json();
+                console.log('Chat History Debug Info:', debug_data);
+                this.showNotification(`Chat history: ${debug_data.chat_history_length} messages`, 'info');
+            } else {
+                console.error('Debug request failed:', response.status);
+            }
+        } catch (error) {
+            console.error('Error in debug chat history:', error);
+        }
     }
 
     /**

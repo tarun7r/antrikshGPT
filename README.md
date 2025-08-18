@@ -21,7 +21,7 @@
   - 🧑‍🚀 **Astronaut Tracker:** Who is in space right now.
   - 🪐 **Planetary Data:** Rich information about celestial bodies in our solar system.
   - 🔭 **And much more!**
-- **Intelligent Web Search:** A smart fallback mechanism uses DuckDuckGo and Wikipedia to answer a vast range of space-related questions.
+
 - **Production-Ready:** Built with a smart caching system, rate limiting, and robust error handling to ensure high availability and low latency.
 - **Stunning UI:** A modern, responsive frontend with a beautiful space theme, CSS animations, and real-time updates via WebSockets.
 
@@ -32,7 +32,7 @@
 - **Frontend:** HTML5, CSS3, JavaScript (ES6+)
 - **Deployment:** Vercel (Serverless)
 - **Authentication:** JWT, passlib, python-jose
-- **Data Sources:** NASA, SpaceX, Launch Library, Open Notify, Wikipedia, DuckDuckGo, and more.
+- **Data Sources:** NASA, SpaceX, Launch Library, Open Notify, and more reliable space APIs.
 
 ## ⚙️ Getting Started
 
