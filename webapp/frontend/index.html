@@ -11,6 +11,7 @@
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
 </head>
 <body>
+    <a href="#chat" class="skip-link">Skip to chat</a>
     <!-- Animated space background -->
     <div class="space-bg">
         <div class="stars"></div>
@@ -63,7 +64,7 @@
             </aside>
 
             <!-- Center - Chat interface -->
-            <section class="chat-section">
+            <section class="chat-section" id="chat">
                 <div class="chat-container">
                     <div class="chat-header">
                         <div class="chat-header-title">
@@ -73,7 +74,7 @@
                         <p>Your AI-powered space exploration companion</p>
                     </div>
                     
-                    <div class="chat-messages" id="chat-messages" aria-live="polite" aria-atomic="false">
+                    <div class="chat-messages" id="chat-messages" role="log" aria-live="polite" aria-relevant="additions text" aria-atomic="false">
                         <div class="message assistant-message welcome-message">
                             <div class="message-avatar">🚀</div>
                             <div class="message-content">
@@ -91,6 +92,7 @@
                             </div>
                         </div>
                     </div>
+                    <button id="scroll-bottom" class="scroll-bottom-btn" aria-label="Scroll to latest message" title="Scroll to latest">⬇️</button>
                     <div class="chat-input-container">
                         <div class="chat-input-wrapper">
                             <textarea

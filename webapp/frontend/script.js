@@ -84,8 +84,11 @@ class AntrikshGPT {
             chip.addEventListener('click', (e) => {
                 const query = e.target.dataset.query;
                 if (query) {
-                    document.getElementById('chat-input').value = query;
-                    this.sendMessage();
+                    const chatInput = document.getElementById('chat-input');
+                    chatInput.value = query;
+                    chatInput.focus();
+                    // Trigger input event to update character counter
+                    chatInput.dispatchEvent(new Event('input'));
                 }
             });
         });
@@ -891,8 +894,8 @@ class AntrikshGPT {
                     <div><strong>📍 Current Position ${cacheIndicator}</strong></div>
                     <div>Lat: ${parseFloat(latitude).toFixed(2)}°</div>
                     <div>Lon: ${parseFloat(longitude).toFixed(2)}°</div>
-                    <div style="font-size: 0.8rem; color: var(--space-gray); margin-top: 0.5rem;">
-                        Updated: ${timestamp.toLocaleTimeString()}
+                    <div style="font-size: 0.8rem; color: var(--space-gray); margin-top: 0.5rem;" data-updated="${timestamp.toISOString()}">
+                        Updated: ${this.toRelativeTime(timestamp)}
                     </div>
                     <div style="font-size: 0.7rem; color: ${isCached ? 'var(--space-gold)' : 'var(--space-green)'}; margin-top: 0.3rem;">
                         ${cacheText} Data
@@ -1049,8 +1052,8 @@ class AntrikshGPT {
             contentEl.innerHTML = `
                 <div class="launch-item">
                     <div class="launch-title">${launchData.name || 'TBD Mission'}</div>
-                    <div class="launch-date">${date.toLocaleDateString()}</div>
-                    <div class="launch-countdown">${timeUntil}</div>
+                    <div class="launch-date" data-launch-date="${date.toISOString()}">${date.toLocaleDateString()}</div>
+                    <div class="launch-countdown" data-launch-countdown="${date.toISOString()}">${timeUntil}</div>
                     <div class="launch-status status-upcoming">Upcoming ${cacheIndicator}</div>
                     <div style="font-size: 0.7rem; color: ${isCached ? 'var(--space-gold)' : 'var(--space-green)'}; margin-top: 0.5rem;">
                         ${cacheText} Data
@@ -1093,7 +1096,9 @@ class AntrikshGPT {
         const refreshEl = document.getElementById('space-news-refresh');
         
         if (contentEl && newsData.articles) {
-            contentEl.innerHTML = newsData.articles.map(article => `
+            // Limit to only 4 news items
+            const limitedArticles = newsData.articles.slice(0, 4);
+            contentEl.innerHTML = limitedArticles.map(article => `
                 <div class="news-item">
                     <a href="${article.url}" target="_blank">${article.title}</a>
                 </div>
@@ -1206,9 +1211,19 @@ class AntrikshGPT {
         
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
         const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
         if (days > 0) return `T-${days}d ${hours}h`;
-        return `T-${hours}h`;
+        if (hours > 0) return `T-${hours}h ${minutes}m`;
+        return `T-${minutes}m ${seconds}s`;
+    }
+
+    toRelativeTime(date) {
+        const diff = (Date.now() - new Date(date).getTime()) / 1000;
+        if (diff < 60) return `${Math.floor(diff)}s ago`;
+        if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
+        if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
+        return `${Math.floor(diff/86400)}d ago`;
     }
 
     /**
@@ -1235,6 +1250,23 @@ class AntrikshGPT {
         const now = new Date();
         const utcTime = now.toUTCString().split(' ')[4]; // Get just the time part
         this.updateStat('current-time', utcTime);
+
+        // Update any relative timestamps
+        document.querySelectorAll('[data-updated]').forEach(el => {
+            const iso = el.getAttribute('data-updated');
+            if (iso) {
+                el.textContent = `Updated: ${this.toRelativeTime(iso)}`;
+            }
+        });
+
+        // Update any launch countdowns
+        document.querySelectorAll('[data-launch-countdown]').forEach(el => {
+            const iso = el.getAttribute('data-launch-countdown');
+            if (iso) {
+                const launchDate = new Date(iso);
+                el.textContent = this.getTimeUntilLaunch(launchDate);
+            }
+        });
     }
 
     /**
