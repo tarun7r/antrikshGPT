@@ -80,7 +80,16 @@
 
         <div class="credits-container">
             <h1>API Credits & Acknowledgements</h1>
-            <p style="text-align: center; margin-bottom: 2rem; color: var(--space-gray);">antrikshGPT is powered by a constellation of open-source APIs. We are deeply grateful to the following providers for making their data available to the world.</p>
+            <p style="text-align: center; margin-bottom: 2rem; color: var(--space-gray);">antrikshGPT is powered by a constellation of open-source APIs and real-time space data services. We are deeply grateful to the following providers for making their data available to the world.</p>
+            
+            <div style="background: rgba(0, 217, 255, 0.1); border: 1px solid rgba(0, 217, 255, 0.3); border-radius: 8px; padding: 1rem; margin-bottom: 2rem;">
+                <h3 style="color: var(--space-cyan); margin-top: 0; font-family: 'Orbitron', sans-serif;">Latest Update: Enhanced Satellite Tracking!</h3>
+                <p style="margin-bottom: 0; color: var(--space-gray);">
+                    We've significantly expanded our capabilities with <strong>real-time satellite tracking</strong> powered by N2YO, 
+                    enhanced NASA APIs, NOAA space weather monitoring, and intelligent web search integration. 
+                    You can now track any satellite in real-time, get space weather alerts, and access comprehensive Earth imagery!
+                </p>
+            </div>
             <table>
                 <thead>
                     <tr>
@@ -120,22 +129,80 @@
                         <td><a href="https://spaceflightnewsapi.net/" target="_blank">Spaceflight News API</a></td>
                         <td>Fetches the latest articles and breaking news from space exploration.</td>
                     </tr>
+                    <tr style="background: rgba(0, 217, 255, 0.05);">
+                        <td><strong>Real-Time Satellite Tracking</strong></td>
+                        <td><a href="https://www.n2yo.com/api/" target="_blank">N2YO Satellite API</a></td>
+                        <td>Provides live satellite positions, orbital tracking, and visibility predictions for thousands of satellites including ISS, GPS, and communication satellites.</td>
+                    </tr>
+                    <tr style="background: rgba(0, 217, 255, 0.05);">
+                        <td><strong>Satellites Above Location</strong></td>
+                        <td><a href="https://www.n2yo.com/api/" target="_blank">N2YO Satellite API</a></td>
+                        <td>Shows all satellites currently visible above any location on Earth with real-time coordinates and elevation data.</td>
+                    </tr>
+                    <tr style="background: rgba(255, 215, 0, 0.05);">
+                        <td><strong>NASA APOD Enhanced</strong></td>
+                        <td><a href="https://api.nasa.gov/" target="_blank">NASA APOD API</a></td>
+                        <td>Now supports random images and historical date queries for NASA's Astronomy Picture of the Day.</td>
+                    </tr>
+                    <tr style="background: rgba(255, 215, 0, 0.05);">
+                        <td><strong>NASA Earth Imagery</strong></td>
+                        <td><a href="https://api.nasa.gov/" target="_blank">NASA Earth API</a></td>
+                        <td>Satellite imagery of any location on Earth from NASA's Landsat 8 satellite.</td>
+                    </tr>
+                    <tr style="background: rgba(255, 215, 0, 0.05);">
+                        <td><strong>NOAA Space Weather</strong></td>
+                        <td><a href="https://www.swpc.noaa.gov/" target="_blank">NOAA Space Weather</a></td>
+                        <td>Real-time space weather alerts, solar storm warnings, and magnetic field disturbance notifications.</td>
+                    </tr>
+                    <tr style="background: rgba(255, 215, 0, 0.05);">
+                        <td><strong>NOAA Solar Wind Data</strong></td>
+                        <td><a href="https://www.swpc.noaa.gov/" target="_blank">NOAA Space Weather</a></td>
+                        <td>Live solar wind speed, density, and magnetic field measurements from space weather monitoring stations.</td>
+                    </tr>
+                    <tr style="background: rgba(34, 197, 94, 0.05);">
+                        <td><strong>Eclipse Predictions</strong></td>
+                        <td><a href="https://www.timeanddate.com/" target="_blank">Web Search Integration</a></td>
+                        <td>Upcoming solar and lunar eclipse information with dates, locations, and visibility details.</td>
+                    </tr>
+                    <tr style="background: rgba(34, 197, 94, 0.05);">
+                        <td><strong>Starlink Constellation</strong></td>
+                        <td><a href="https://www.starlink.com/" target="_blank">Web Search Integration</a></td>
+                        <td>Current status and information about SpaceX's Starlink satellite constellation.</td>
+                    </tr>
                 </tbody>
             </table>
-            <p style="text-align: center; margin-top: 2rem; color: var(--space-gray);">This project stands on the shoulders of giants. The open data community makes applications like this possible, and we extend our sincere thanks to all of them.</p>
+            <div style="background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; padding: 1rem; margin-top: 2rem;">
+                <h4 style="color: var(--space-gold); margin-top: 0; font-family: 'Orbitron', sans-serif;">🌟 API Statistics</h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 2rem; color: var(--space-cyan); font-weight: bold;">14+</div>
+                        <div style="color: var(--space-gray); font-size: 0.9rem;">Active APIs</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 2rem; color: var(--space-gold); font-weight: bold;">8</div>
+                        <div style="color: var(--space-gray); font-size: 0.9rem;">New Integrations</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 2rem; color: var(--space-green); font-weight: bold;">Real-time</div>
+                        <div style="color: var(--space-gray); font-size: 0.9rem;">Satellite Tracking</div>
+                    </div>
+                </div>
+            </div>
+            
+            <p style="text-align: center; margin-top: 2rem; color: var(--space-gray);">This project stands on the shoulders of giants. The open data community and space agencies make applications like this possible, and we extend our sincere thanks to all of them.</p>
         </div>
 
         <!-- Footer -->
         <footer class="footer">
             <div class="footer-content">
                 <div class="sanskrit-quote">ऋतं सत्यं परं ब्रह्म। - "Cosmic order (ṛta) and truth (satya) are the supreme Brahman." </div>
-                <p>&copy; 2025 antrikshGPT - Made with ❤️ for the love of space</p>
+                <p>&copy; 2025 antrikshGPT - Made with ❤️ for the exploration of space</p>
                 <div class="footer-links">
                     <a href="https://github.com/tarun7r/antrikshGPT" target="_blank">GitHub</a>
                     <span class="footer-separator">|</span>
                     <a href="/credits" target="_blank">API Credits</a>
                     <span class="footer-separator">|</span>
-                    <span class="powered-by">Powered by Open-Notify, NASA, The Space Devs & more</span>
+                    <span class="powered-by">Powered by NASA, N2YO, NOAA, Open-Notify & more</span>
                 </div>
             </div>
         </footer>

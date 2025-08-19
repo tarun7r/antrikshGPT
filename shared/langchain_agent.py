@@ -322,6 +322,91 @@ class SpaceGPTAgent:
             }
         ))
         
+        # NASA APOD tool
+        tools.append(MCPTool(
+            name="get_nasa_apod",
+            description="Get NASA's Astronomy Picture of the Day with stunning space images and detailed explanations. Specify a date (YYYY-MM-DD) for a specific day or count for random images.",
+            tool_func=space_api.get_nasa_apod,
+            schema={
+                "date": (Optional[str], None),
+                "count": (Optional[int], None)
+            }
+        ))
+        
+        # Satellite Tracking tool
+        tools.append(MCPTool(
+            name="track_satellite",
+            description="Track a satellite's position over time from an observer's location using NORAD ID. Useful for tracking specific satellites like ISS (ID: 25544), Hubble (ID: 20580), or others.",
+            tool_func=space_api.track_satellite,
+            schema={
+                "satellite_id": (int, ...),
+                "observer_lat": (float, 0.0),
+                "observer_lng": (float, 0.0),
+                "observer_alt": (float, 0.0),
+                "seconds": (int, 300)
+            }
+        ))
+        
+        # Satellites Above tool
+        tools.append(MCPTool(
+            name="get_satellites_above",
+            description="Get all satellites currently visible above a specific location with minimum elevation angle. Requires observer's latitude and longitude coordinates.",
+            tool_func=space_api.get_satellites_above,
+            schema={
+                "observer_lat": (float, ...),
+                "observer_lng": (float, ...),
+                "observer_alt": (float, 0.0),
+                "elevation": (float, 10.0)
+            }
+        ))
+        
+        # NOAA Space Weather Alerts tool
+        tools.append(MCPTool(
+            name="get_noaa_space_weather_alerts",
+            description="Get current space weather alerts, warnings, and watches from NOAA Space Weather Prediction Center including solar storm and magnetic field disturbance alerts.",
+            tool_func=space_api.get_noaa_space_weather_alerts,
+            schema={}
+        ))
+        
+        # Solar Wind Data tool
+        tools.append(MCPTool(
+            name="get_noaa_solar_wind_data",
+            description="Get current solar wind data including magnetic field strength, plasma density, speed, and temperature measurements from ACE spacecraft.",
+            tool_func=space_api.get_noaa_solar_wind_data,
+            schema={}
+        ))
+        
+        # NASA Earth Imagery tool
+        tools.append(MCPTool(
+            name="get_nasa_earth_imagery",
+            description="Get NASA Landsat 8 Earth imagery for any location on Earth. Specify latitude, longitude, and optionally date and image dimension.",
+            tool_func=space_api.get_nasa_earth_imagery,
+            schema={
+                "lat": (float, ...),
+                "lon": (float, ...),
+                "date": (Optional[str], None),
+                "dim": (float, 0.15)
+            }
+        ))
+        
+        # Eclipse Data tool
+        tools.append(MCPTool(
+            name="get_eclipse_data",
+            description="Get information about upcoming solar or lunar eclipses including dates, locations, and visibility details.",
+            tool_func=space_api.get_eclipse_data,
+            schema={
+                "eclipse_type": (str, "solar")
+            }
+        ))
+        
+        # Starlink Satellites tool
+        tools.append(MCPTool(
+            name="get_starlink_satellites",
+            description="Get current information about SpaceX's Starlink satellite constellation including active satellite count and status.",
+            tool_func=space_api.get_starlink_satellites,
+            schema={}
+        ))
+        
         return tools
     
     async def _execute_tool_calls(self, tool_calls: List[Dict[str, Any]]) -> List[ToolMessage]:
@@ -694,7 +779,7 @@ class SpaceGPTAgent:
             messages = []
             
             # Add system message with dynamic date
-            system_prompt = """You are SpaceGPT, an expert space information assistant with access to real-time space data tools and APIs. You are knowledgeable, enthusiastic, and always provide accurate, up-to-date information.
+            system_prompt = """You are AntrikshGPT, an expert space information assistant with access to real-time space data tools and APIs. You are knowledgeable, enthusiastic, and always provide accurate, up-to-date information.
 
 ## CORE PRINCIPLES
 - ALWAYS use tools for space-related queries - never provide generic or outdated information
@@ -738,9 +823,23 @@ You MUST call the appropriate tool(s) for these query types:
 - "Space discoveries", "latest in space" → get_space_news(limit)
 
 **Space Weather & Solar Activity:**
-- ANY space weather question → get_space_weather(start_date, end_date)
-- "Solar storms", "CME", "aurora", "solar flares" → get_space_weather()
-- "Space weather events" → get_space_weather()
+- ANY space weather question → get_space_weather(start_date, end_date) OR get_noaa_space_weather_alerts() OR get_noaa_solar_wind_data()
+- "Solar storms", "CME", "aurora", "solar flares" → get_noaa_space_weather_alerts()
+- "Space weather alerts", "current space weather" → get_noaa_space_weather_alerts()
+- "Solar wind", "magnetic field", "plasma data" → get_noaa_solar_wind_data()
+- For historical space weather → get_space_weather()
+
+**Satellite Tracking:**
+- "Track satellite", "satellite position" → track_satellite(satellite_id, observer_lat, observer_lng)
+- "Satellites overhead", "visible satellites" → get_satellites_above(observer_lat, observer_lng)
+- Common satellite IDs: ISS (25544), Hubble (20580), GPS satellites, communication satellites
+- "Starlink satellites", "Starlink constellation" → get_starlink_satellites()
+
+**NASA Imagery & Photography:**
+- "NASA picture of the day", "APOD", "space image" → get_nasa_apod(date, count)
+- "Earth imagery", "satellite image", "Landsat" → get_nasa_earth_imagery(lat, lon, date)
+- For specific dates: use YYYY-MM-DD format
+- For random images: use count parameter (max 10)
 
 **Exoplanets & Deep Space:**
 - ANY exoplanet question → get_exoplanet_info(planet_name)
@@ -750,8 +849,11 @@ You MUST call the appropriate tool(s) for these query types:
 - ANY asteroid/comet question → get_near_earth_objects(start_date, end_date)
 - "Asteroids", "NEOs", "near Earth objects" → get_near_earth_objects() - If no date is provided, **DEFAULT TO THE NEXT 7 DAYS**
 
-**Fallback Web Search:**
+**Eclipses & Astronomical Events:**
+- "Eclipse", "solar eclipse", "lunar eclipse" → get_eclipse_data(eclipse_type)
+- Use eclipse_type: "solar" or "lunar"
 
+**Fallback Web Search:**
 - Use for topics like: space history, space agencies, space technology, astronaut biographies, space missions not covered by SpaceX, theoretical physics related to space, space science concepts, etc.
 - ONLY use web search for space/astronomy related queries - never for non-space topics
 
@@ -760,18 +862,39 @@ You MUST call the appropriate tool(s) for these query types:
 - ALWAYS convert relative dates like "next week", "tomorrow", "next 7 days" into `YYYY-MM-DD` format for tool calls.
 - If a user asks about asteroids without a date, call `get_near_earth_objects()` and I will automatically check for the next 7 days.
 
-## TOOL REFERENCE
+## ENHANCED TOOL REFERENCE
+**Space Data & Tracking:**
 - get_spacex_next_launch() - Next scheduled SpaceX mission with real-time status
 - get_spacex_launches(limit) - Recent/upcoming SpaceX missions (default: 10)
 - get_iss_location() - Current ISS coordinates and timestamp
 - get_people_in_space() - Current astronauts and their spacecraft
+- track_satellite(satellite_id, observer_lat, observer_lng, observer_alt, seconds) - Track specific satellite positions
+- get_satellites_above(observer_lat, observer_lng, observer_alt, elevation) - Satellites visible from location
+
+**Planetary & Solar System:**
 - get_mars_weather() - Current Mars atmospheric conditions from InSight
 - search_mars_photos(sol, camera) - Mars rover images (sol: Martian day, camera: fhaz/rhaz/navcam/mastcam)
-- get_near_earth_objects(start_date, end_date) - Asteroid/comet data (dates: YYYY-MM-DD)
-- get_space_news(limit) - Recent space news articles (default: 10)
 - get_solar_system_body(body_id) - Detailed solar system body information
+- get_near_earth_objects(start_date, end_date) - Asteroid/comet data (dates: YYYY-MM-DD)
+
+**Space Weather & Environment:**
+- get_noaa_space_weather_alerts() - Current NOAA space weather alerts and warnings
+- get_noaa_solar_wind_data() - Real-time solar wind magnetic field and plasma data
 - get_space_weather(start_date, end_date) - Space weather news (solar storms, CMEs, auroras)
+
+**NASA Imagery & Data:**
+- get_nasa_apod(date, count) - NASA's Astronomy Picture of the Day
+- get_nasa_earth_imagery(lat, lon, date, dim) - NASA Landsat 8 Earth imagery
+
+**News & Discoveries:**
+- get_space_news(limit) - Recent space news articles (default: 10)
 - get_exoplanet_info(planet_name) - Exoplanet information and recent discoveries
+
+**Astronomical Events:**
+- get_eclipse_data(eclipse_type) - Upcoming eclipse information ("solar" or "lunar")
+- get_starlink_satellites() - SpaceX Starlink constellation status
+
+**General Search:**
 - web_search(query, max_results) - Web search for space/astronomy topics (default max_results: 5)
 
 
@@ -808,7 +931,7 @@ You MUST call the appropriate tool(s) for these query types:
 - Suggest interesting space questions the user could ask instead
 - Maintain enthusiasm and educational value
 
-Remember: You are SpaceGPT - the most current and accurate space information assistant. Every response should reflect real-time data and provide genuine value to users interested in space exploration!"""
+Remember: You are AntrikshGPT - the most current and accurate space information assistant. Every response should reflect real-time data and provide genuine value to users interested in space exploration!"""
             
             # Replace placeholder with current date
             current_date = datetime.now().strftime("%Y-MM-DD")

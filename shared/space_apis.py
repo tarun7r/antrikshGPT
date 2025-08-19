@@ -6,6 +6,7 @@ import aiohttp
 import json
 import time
 import logging
+import os
 from typing import Dict, List, Optional, Any
 from datetime import datetime, timedelta
 from config.settings import settings
@@ -600,6 +601,313 @@ class SpaceAPIClient:
                                 
         except Exception as e:
             error_msg = f"Error fetching exoplanet info for {planet_name}: {str(e)}"
+            logger.error(error_msg)
+            return {"error": error_msg}
+
+    async def get_nasa_apod(self, date: Optional[str] = None, count: Optional[int] = None) -> Dict[str, Any]:
+        """Get NASA's Astronomy Picture of the Day."""
+        cache_key = self._get_cache_key("nasa_apod", date=date, count=count)
+        cached_data = self._get_cached_data(cache_key)
+        if cached_data:
+            return cached_data
+            
+        url = "https://api.nasa.gov/planetary/apod"
+        params = {"api_key": self.nasa_api_key}
+        
+        if date:
+            params["date"] = date
+        elif count:
+            params["count"] = min(count, 10)  # Limit to 10 images max
+        
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, params=params, timeout=30) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        self._set_cached_data(cache_key, data)
+                        return data
+                    else:
+                        error_msg = f"Failed to fetch NASA APOD: {response.status}"
+                        logger.error(error_msg)
+                        return {"error": error_msg}
+        except asyncio.TimeoutError:
+            error_msg = "Timeout while fetching NASA APOD"
+            logger.error(error_msg)
+            return {"error": error_msg}
+        except Exception as e:
+            error_msg = f"Error fetching NASA APOD: {str(e)}"
+            logger.error(error_msg)
+            return {"error": error_msg}
+
+    async def track_satellite(self, satellite_id: int, observer_lat: float = 0, observer_lng: float = 0, observer_alt: float = 0, seconds: int = 300) -> Dict[str, Any]:
+        """Track satellite using N2YO API with observer position."""
+        cache_key = self._get_cache_key("satellite_track", satellite_id=satellite_id, observer_lat=observer_lat, observer_lng=observer_lng, seconds=seconds)
+        cached_data = self._get_cached_data(cache_key)
+        if cached_data:
+            return cached_data
+            
+        # N2YO API endpoint - you would need to get an API key from n2yo.com
+        url = "https://api.n2yo.com/rest/v1/satellite/positions/{}/{}/{}/{}/{}".format(satellite_id, observer_lat, observer_lng, observer_alt, seconds)
+        params = {
+            "apiKey": settings.n2yo_api_key  # Use settings instead of os.getenv
+        }
+        
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, params=params, timeout=30) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        self._set_cached_data(cache_key, data)
+                        return data
+                    else:
+                        error_msg = f"Failed to track satellite: {response.status}"
+                        logger.error(error_msg)
+                        return {"error": error_msg}
+        except Exception as e:
+            error_msg = f"Error tracking satellite: {str(e)}"
+            logger.error(error_msg)
+            return {"error": error_msg}
+
+    async def get_satellites_above(self, observer_lat: float, observer_lng: float, observer_alt: float = 0, elevation: float = 10) -> Dict[str, Any]:
+        """Get satellites currently visible above a location.
+        
+        Args:
+            observer_lat: Observer latitude in degrees
+            observer_lng: Observer longitude in degrees  
+            observer_alt: Observer altitude in meters (default: 0)
+            elevation: Minimum elevation angle in degrees (default: 10, minimum to avoid SQL errors)
+        """
+        cache_key = self._get_cache_key("satellites_above", observer_lat=observer_lat, observer_lng=observer_lng, elevation=elevation)
+        cached_data = self._get_cached_data(cache_key)
+        if cached_data:
+            return cached_data
+            
+        url = f"https://api.n2yo.com/rest/v1/satellite/above/{observer_lat}/{observer_lng}/{observer_alt}/{elevation}/0"
+        params = {
+            "apiKey": settings.n2yo_api_key
+        }
+        
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, params=params, timeout=30) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        self._set_cached_data(cache_key, data)
+                        return data
+                    else:
+                        error_msg = f"Failed to get satellites above: {response.status}"
+                        logger.error(error_msg)
+                        return {"error": error_msg}
+        except Exception as e:
+            error_msg = f"Error getting satellites above: {str(e)}"
+            logger.error(error_msg)
+            return {"error": error_msg}
+
+    async def get_noaa_space_weather_alerts(self) -> Dict[str, Any]:
+        """Get current space weather alerts from NOAA."""
+        cache_key = self._get_cache_key("noaa_space_weather")
+        cached_data = self._get_cached_data(cache_key)
+        if cached_data:
+            return cached_data
+            
+        url = "https://services.swpc.noaa.gov/products/alerts.json"
+        
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, timeout=30) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        
+                        # Process and format the alerts
+                        formatted_alerts = []
+                        for alert in data:
+                            formatted_alerts.append({
+                                "alert_id": alert.get("alert_id"),
+                                "product_id": alert.get("product_id"),
+                                "message": alert.get("message", "").strip(),
+                                "issue_datetime": alert.get("issue_datetime"),
+                                "serial_number": alert.get("serial_number")
+                            })
+                        
+                        result = {
+                            "alerts": formatted_alerts,
+                            "count": len(formatted_alerts),
+                            "timestamp": datetime.now().isoformat()
+                        }
+                        
+                        self._set_cached_data(cache_key, result)
+                        return result
+                    else:
+                        error_msg = f"Failed to fetch NOAA space weather alerts: {response.status}"
+                        logger.error(error_msg)
+                        return {"error": error_msg}
+        except Exception as e:
+            error_msg = f"Error fetching NOAA space weather alerts: {str(e)}"
+            logger.error(error_msg)
+            return {"error": error_msg}
+
+    async def get_noaa_solar_wind_data(self) -> Dict[str, Any]:
+        """Get current solar wind data from NOAA."""
+        cache_key = self._get_cache_key("noaa_solar_wind")
+        cached_data = self._get_cached_data(cache_key)
+        if cached_data:
+            return cached_data
+            
+        url = "https://services.swpc.noaa.gov/products/solar-wind/mag-1-day.json"
+        
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, timeout=30) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        
+                        # Get the most recent data point
+                        if len(data) > 1:  # First row is headers
+                            latest = data[-1]  # Most recent entry
+                            result = {
+                                "timestamp": latest[0] if len(latest) > 0 else "unknown",
+                                "bt_gsm": latest[1] if len(latest) > 1 else None,
+                                "bz_gsm": latest[2] if len(latest) > 2 else None,
+                                "density": latest[3] if len(latest) > 3 else None,
+                                "speed": latest[4] if len(latest) > 4 else None,
+                                "temperature": latest[5] if len(latest) > 5 else None,
+                                "note": "Solar wind magnetic field and plasma data from ACE spacecraft"
+                            }
+                        else:
+                            result = {"error": "No solar wind data available"}
+                        
+                        self._set_cached_data(cache_key, result)
+                        return result
+                    else:
+                        error_msg = f"Failed to fetch solar wind data: {response.status}"
+                        logger.error(error_msg)
+                        return {"error": error_msg}
+        except Exception as e:
+            error_msg = f"Error fetching solar wind data: {str(e)}"
+            logger.error(error_msg)
+            return {"error": error_msg}
+
+    async def get_nasa_earth_imagery(self, lat: float, lon: float, date: Optional[str] = None, dim: float = 0.15) -> Dict[str, Any]:
+        """Get NASA Earth imagery for a specific location."""
+        cache_key = self._get_cache_key("nasa_earth_imagery", lat=lat, lon=lon, date=date, dim=dim)
+        cached_data = self._get_cached_data(cache_key)
+        if cached_data:
+            return cached_data
+            
+        url = "https://api.nasa.gov/planetary/earth/imagery"
+        params = {
+            "lon": lon,
+            "lat": lat,
+            "dim": dim,
+            "api_key": self.nasa_api_key
+        }
+        
+        if date:
+            params["date"] = date
+        
+        try:
+            # Use a longer timeout for NASA Earth imagery API
+            timeout = aiohttp.ClientTimeout(total=60)  # 60 seconds timeout
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                async with session.get(url, params=params) as response:
+                    if response.status == 200:
+                        # NASA Earth imagery API returns JSON with image URL
+                        try:
+                            data = await response.json()
+                            if isinstance(data, dict) and 'url' in data:
+                                result = {
+                                    "url": data['url'],  # Use 'url' key for consistency
+                                    "latitude": lat,
+                                    "longitude": lon,
+                                    "dimension": dim,
+                                    "date": date or "latest",
+                                    "note": "NASA Landsat 8 Earth imagery"
+                                }
+                            else:
+                                # Fallback to response URL if JSON parsing fails
+                                result = {
+                                    "url": str(response.url),
+                                    "latitude": lat,
+                                    "longitude": lon,
+                                    "dimension": dim,
+                                    "date": date or "latest",
+                                    "note": "NASA Landsat 8 Earth imagery"
+                                }
+                        except Exception as json_error:
+                            logger.warning(f"JSON parsing failed for NASA Earth imagery: {json_error}")
+                            # If JSON parsing fails, use response URL
+                            result = {
+                                "url": str(response.url),
+                                "latitude": lat,
+                                "longitude": lon,
+                                "dimension": dim,
+                                "date": date or "latest",
+                                "note": "NASA Landsat 8 Earth imagery"
+                            }
+                        
+                        self._set_cached_data(cache_key, result)
+                        return result
+                    else:
+                        error_msg = f"Failed to fetch NASA Earth imagery: HTTP {response.status}"
+                        logger.error(error_msg)
+                        return {"error": error_msg}
+        except asyncio.TimeoutError:
+            error_msg = "NASA Earth imagery API request timed out (60s). The service may be experiencing high load."
+            logger.error(error_msg)
+            return {"error": error_msg}
+        except Exception as e:
+            error_msg = f"Error fetching NASA Earth imagery: {str(e)}"
+            logger.error(error_msg)
+            return {"error": error_msg}
+
+    async def get_eclipse_data(self, eclipse_type: str = "solar") -> Dict[str, Any]:
+        """Get upcoming eclipse data using web search (as there's no free dedicated eclipse API)."""
+        cache_key = self._get_cache_key("eclipse_data", eclipse_type=eclipse_type)
+        cached_data = self._get_cached_data(cache_key)
+        if cached_data:
+            return cached_data
+            
+        try:
+            # Use web search to find eclipse information
+            search_query = f"upcoming {eclipse_type} eclipse 2024 2025 dates locations"
+            search_results = await self.web_search(search_query, max_results=3)
+            
+            result = {
+                "eclipse_type": eclipse_type,
+                "search_results": search_results,
+                "note": f"Eclipse information for {eclipse_type} eclipses from web search"
+            }
+            
+            self._set_cached_data(cache_key, result)
+            return result
+            
+        except Exception as e:
+            error_msg = f"Error fetching eclipse data: {str(e)}"
+            logger.error(error_msg)
+            return {"error": error_msg}
+
+    async def get_starlink_satellites(self) -> Dict[str, Any]:
+        """Get Starlink constellation status using web search."""
+        cache_key = self._get_cache_key("starlink_status")
+        cached_data = self._get_cached_data(cache_key)
+        if cached_data:
+            return cached_data
+            
+        try:
+            # Use web search for Starlink information
+            search_results = await self.web_search("Starlink satellites active constellation count", max_results=3)
+            
+            result = {
+                "constellation": "Starlink",
+                "search_results": search_results,
+                "note": "Current Starlink satellite constellation information"
+            }
+            
+            self._set_cached_data(cache_key, result)
+            return result
+            
+        except Exception as e:
+            error_msg = f"Error fetching Starlink data: {str(e)}"
             logger.error(error_msg)
             return {"error": error_msg}
 

@@ -70,7 +70,7 @@
                         <div class="chat-header-title">
                             <h2>👨‍🚀 antrikshGPT Assistant</h2>
                         </div>
-                        <button id="clear-chat-button" class="clear-chat-button" aria-label="Clear chat" title="Clear chat">×</button>
+                        <button id="clear-chat-button" class="clear-chat-button" aria-label="Clear chat" title="Clear chat">🧹</button>
                         <p>Your AI-powered space exploration companion</p>
                     </div>
                     
@@ -79,14 +79,16 @@
                             <div class="message-avatar">🚀</div>
                             <div class="message-content">
                                 <p>Welcome to antrikshGPT! 🌌</p>
-                                <p>I'm your AI space exploration assistant with access to real-time space data. Ask me about:</p>
+                                <p>I'm your AI space exploration assistant with access to real-time space data and satellite tracking. Ask me about:</p>
                                 <ul>
-                                    <li>🛰️ International Space Station location</li>
-                                    <li>🚀 SpaceX launches and missions</li>
-                                    <li>🔴 Mars weather and rover photos</li>
-                                    <li>📡 Space news and discoveries</li>
+                                    <li>🛰️ Real-time satellite tracking (ISS, Hubble, GPS satellites)</li>
+                                    <li>🌌 NASA Astronomy Picture of the Day</li>
+                                    <li>🌍 Satellite imagery of any location on Earth</li>
+                                    <li>🌪️ Space weather alerts and solar wind data</li>
+                                    <li>🌙 Eclipse predictions and celestial events</li>
+                                    <li>🚀 SpaceX launches and Starlink information</li>
+                                    <li>🔴 Mars weather and exploration</li>
                                     <li>👨‍🚀 Current astronauts in space</li>
-                                    <li>🌍 Near Earth objects and asteroids</li>
                                 </ul>
                                 <p>What would you like to explore today?</p>
                             </div>
@@ -162,11 +164,15 @@
         <section class="suggestion-section">
             <h3 class="suggestion-header">🚀 Try These Questions</h3>
             <div class="input-suggestions">
-                <button class="suggestion-chip" data-query="Where is the ISS right now?">📍 ISS Location</button>
-                <button class="suggestion-chip" data-query="What's the next SpaceX launch?">🚀 Next Launch</button>
+                <button class="suggestion-chip" data-query="Track the ISS in real-time">📍 Live ISS Tracking</button>
+                <button class="suggestion-chip" data-query="What satellites are above New York right now?">🛰️ Satellites Above NYC</button>
+                <button class="suggestion-chip" data-query="Show me today's NASA astronomy picture">🌌 NASA APOD Today</button>
                 <button class="suggestion-chip" data-query="What's the weather like on Mars?">🔴 Mars Weather</button>
-                <button class="suggestion-chip" data-query="Who is in space right now?">👨‍🚀 People in Space</button>
-                <button class="suggestion-chip" data-query="Latest space news">📡 Space News</button>
+                <button class="suggestion-chip" data-query="Are there any space weather alerts?">🌪️ Space Weather Alerts</button>
+                <button class="suggestion-chip" data-query="Show me satellite imagery of Tokyo">🌍 Earth from Space</button>
+                <button class="suggestion-chip" data-query="When is the next solar eclipse?">🌙 Eclipse Predictions</button>
+                <button class="suggestion-chip" data-query="What's the current solar wind speed?">☀️ Solar Wind Data</button>
+                <button class="suggestion-chip" data-query="Tell me about Starlink satellites">🛰️ Starlink Info</button>
             </div>
         </section>
 
@@ -177,35 +183,198 @@
                 <div class="capability-card">
                     <div class="capability-icon">🛰️</div>
                     <div class="capability-text">
-                        <h4>ISS & Astronauts</h4>
-                        <p>"Where is the ISS right now?"</p>
-                        <p>"Who is currently in space?"</p>
+                        <h4>Real-Time Satellite Tracking</h4>
+                        <p>"Track the ISS in real-time"</p>
+                        <p>"What satellites are above me?"</p>
+                        <p>"Show me Hubble's current position"</p>
+                    </div>
+                </div>
+                <div class="capability-card">
+                    <div class="capability-icon">🌌</div>
+                    <div class="capability-text">
+                        <h4>NASA Astronomy</h4>
+                        <p>"Show me today's NASA picture"</p>
+                        <p>"Random space image from NASA"</p>
+                        <p>"APOD from last week"</p>
+                    </div>
+                </div>
+                <div class="capability-card">
+                    <div class="capability-icon">🌍</div>
+                    <div class="capability-text">
+                        <h4>Earth from Space</h4>
+                        <p>"Satellite view of Paris"</p>
+                        <p>"Show me Tokyo from space"</p>
+                        <p>"Earth imagery of Mount Everest"</p>
+                    </div>
+                </div>
+                <div class="capability-card">
+                    <div class="capability-icon">🌪️</div>
+                    <div class="capability-text">
+                        <h4>Space Weather</h4>
+                        <p>"Any solar storm alerts?"</p>
+                        <p>"Current solar wind speed"</p>
+                        <p>"Space weather forecast"</p>
+                    </div>
+                </div>
+                <div class="capability-card">
+                    <div class="capability-icon">🌙</div>
+                    <div class="capability-text">
+                        <h4>Eclipse Predictions</h4>
+                        <p>"When is the next solar eclipse?"</p>
+                        <p>"Lunar eclipse dates 2025"</p>
+                        <p>"Eclipse visibility in my area"</p>
                     </div>
                 </div>
                 <div class="capability-card">
                     <div class="capability-icon">🚀</div>
                     <div class="capability-text">
-                        <h4>SpaceX Missions</h4>
-                        <p>"What is the next SpaceX launch?"</p>
-                        <p>"Show me recent launches."</p>
+                        <h4>Space Missions</h4>
+                        <p>"Next SpaceX launch details"</p>
+                        <p>"Starlink satellite information"</p>
+                        <p>"Current astronauts in space"</p>
                     </div>
                 </div>
-                <div class="capability-card">
-                    <div class="capability-icon">🔴</div>
-                    <div class="capability-text">
-                        <h4>Mars Exploration</h4>
-                        <p>"What's the weather on Mars?"</p>
-                        <p>"Show photos from Curiosity."</p>
+            </div>
+        </section>
+
+        <!-- MCP Tools Section -->
+        <section class="mcp-tools-section">
+            <h3 class="suggestion-header">🔧 Available MCP Tools</h3>
+            <div class="mcp-tools-grid">
+                <div class="mcp-tool-card">
+                    <div class="tool-icon">🛰️</div>
+                    <div class="tool-info">
+                        <h4>ISS Location</h4>
+                        <p>Get current ISS coordinates and timestamp</p>
                     </div>
                 </div>
-                <div class="capability-card">
-                    <div class="capability-icon">🪐</div>
-                    <div class="capability-text">
-                        <h4>Solar System</h4>
-                        <p>"Tell me about Jupiter."</p>
-                        <p>"Are there any asteroids nearby?"</p>
+                <div class="mcp-tool-card">
+                    <div class="tool-icon">👨‍🚀</div>
+                    <div class="tool-info">
+                        <h4>People in Space</h4>
+                        <p>List of current astronauts and spacecraft</p>
                     </div>
                 </div>
+                <div class="mcp-tool-card">
+                    <div class="tool-icon">🚀</div>
+                    <div class="tool-info">
+                        <h4>SpaceX Launches</h4>
+                        <p>Recent and upcoming SpaceX missions</p>
+                    </div>
+                </div>
+                <div class="mcp-tool-card">
+                    <div class="tool-icon">🔴</div>
+                    <div class="tool-info">
+                        <h4>Mars Weather</h4>
+                        <p>Current Mars atmospheric conditions</p>
+                    </div>
+                </div>
+                <div class="mcp-tool-card">
+                    <div class="tool-icon">🌍</div>
+                    <div class="tool-info">
+                        <h4>Near Earth Objects</h4>
+                        <p>Asteroids and comets near Earth</p>
+                    </div>
+                </div>
+                <div class="mcp-tool-card">
+                    <div class="tool-icon">📸</div>
+                    <div class="tool-info">
+                        <h4>Mars Photos</h4>
+                        <p>Images from Mars rovers</p>
+                    </div>
+                </div>
+                <div class="mcp-tool-card">
+                    <div class="tool-icon">📰</div>
+                    <div class="tool-info">
+                        <h4>Space News</h4>
+                        <p>Latest spaceflight news articles</p>
+                    </div>
+                </div>
+                <div class="mcp-tool-card">
+                    <div class="tool-icon">🪐</div>
+                    <div class="tool-info">
+                        <h4>Solar System Bodies</h4>
+                        <p>Detailed planetary information</p>
+                    </div>
+                </div>
+                <div class="mcp-tool-card">
+                    <div class="tool-icon">🌪️</div>
+                    <div class="tool-info">
+                        <h4>Space Weather</h4>
+                        <p>Solar storms and space weather events</p>
+                    </div>
+                </div>
+                <div class="mcp-tool-card">
+                    <div class="tool-icon">🌌</div>
+                    <div class="tool-info">
+                        <h4>Exoplanet Info</h4>
+                        <p>Information about exoplanets</p>
+                    </div>
+                </div>
+                <div class="mcp-tool-card">
+                    <div class="tool-icon">🔍</div>
+                    <div class="tool-info">
+                        <h4>Web Search</h4>
+                        <p>Search web for space topics</p>
+                    </div>
+                </div>
+                <div class="mcp-tool-card">
+                    <div class="tool-icon">🌌</div>
+                    <div class="tool-info">
+                        <h4>NASA APOD</h4>
+                        <p>Astronomy Picture of the Day</p>
+                    </div>
+                </div>
+                <div class="mcp-tool-card">
+                    <div class="tool-icon">📍</div>
+                    <div class="tool-info">
+                        <h4>Satellite Tracking</h4>
+                        <p>Track satellite positions in real-time</p>
+                    </div>
+                </div>
+                <div class="mcp-tool-card">
+                    <div class="tool-icon">🛰️</div>
+                    <div class="tool-info">
+                        <h4>Satellites Above</h4>
+                        <p>Satellites visible from any location</p>
+                    </div>
+                </div>
+                <div class="mcp-tool-card">
+                    <div class="tool-icon">⚠️</div>
+                    <div class="tool-info">
+                        <h4>Space Weather Alerts</h4>
+                        <p>NOAA space weather warnings</p>
+                    </div>
+                </div>
+                <div class="mcp-tool-card">
+                    <div class="tool-icon">☀️</div>
+                    <div class="tool-info">
+                        <h4>Solar Wind Data</h4>
+                        <p>Real-time solar wind measurements</p>
+                    </div>
+                </div>
+                <div class="mcp-tool-card">
+                    <div class="tool-icon">🌍</div>
+                    <div class="tool-info">
+                        <h4>Earth Imagery</h4>
+                        <p>NASA Landsat 8 satellite images</p>
+                    </div>
+                </div>
+                <div class="mcp-tool-card">
+                    <div class="tool-icon">🌙</div>
+                    <div class="tool-info">
+                        <h4>Eclipse Data</h4>
+                        <p>Solar and lunar eclipse information</p>
+                    </div>
+                </div>
+                <div class="mcp-tool-card">
+                    <div class="tool-icon">🛰️</div>
+                    <div class="tool-info">
+                        <h4>Starlink Info</h4>
+                        <p>SpaceX Starlink constellation status</p>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <!-- Footer -->

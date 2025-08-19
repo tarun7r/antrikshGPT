@@ -68,6 +68,17 @@ class SmartCacheManager:
             "people-in-space": 1800, # People in space every 30 minutes
             "space-news": 1800,     # News every 30 minutes
             "mars-weather": 3600,   # Mars weather every hour
+            # New API cache settings
+            "nasa-apod": 43200,     # NASA APOD changes daily (12 hours cache)
+            "nasa-apod-random": 1800, # Random APOD images every 30 minutes
+            "noaa-space-weather-alerts": 300,  # Space weather alerts every 5 minutes
+            "noaa-solar-wind": 600,   # Solar wind data every 10 minutes
+            "starlink-satellites": 3600,  # Starlink status every hour
+            "eclipse-solar": 86400,   # Eclipse data daily
+            "eclipse-lunar": 86400,   # Eclipse data daily
+            "satellite-track": 180,   # Satellite tracking every 3 minutes
+            "satellites-above": 300,  # Satellites overhead every 5 minutes
+            "nasa-earth-imagery": 86400, # Earth imagery daily
         }
         
         # Rate limiting settings
@@ -78,6 +89,17 @@ class SmartCacheManager:
             "people-in-space": {"calls": 20, "window": 3600}, # 20 calls per hour
             "space-news": {"calls": 10, "window": 3600},    # 10 calls per hour
             "mars-weather": {"calls": 10, "window": 3600},  # 10 calls per hour
+            # New API rate limits
+            "nasa-apod": {"calls": 30, "window": 3600},     # 30 calls per hour (NASA limit: 1000/hour)
+            "nasa-apod-random": {"calls": 20, "window": 3600}, # 20 calls per hour
+            "noaa-space-weather-alerts": {"calls": 30, "window": 3600}, # 30 calls per hour
+            "noaa-solar-wind": {"calls": 30, "window": 3600}, # 30 calls per hour
+            "starlink-satellites": {"calls": 10, "window": 3600}, # 10 calls per hour
+            "eclipse-solar": {"calls": 5, "window": 3600},  # 5 calls per hour
+            "eclipse-lunar": {"calls": 5, "window": 3600},  # 5 calls per hour
+            "satellite-track": {"calls": 20, "window": 3600}, # 20 calls per hour (N2YO limit)
+            "satellites-above": {"calls": 20, "window": 3600}, # 20 calls per hour
+            "nasa-earth-imagery": {"calls": 20, "window": 3600}, # 20 calls per hour
         }
     
     def _is_cache_valid(self, key: str) -> bool:
@@ -396,6 +418,14 @@ async def get_space_data(data_type: str):
             # Default to last 7 days if no dates are given (handled in the client)
             "space-weather": lambda: space_api.get_space_weather(),
             "near-earth-objects": lambda: space_api.get_near_earth_objects(),
+            # New APIs
+            "nasa-apod": space_api.get_nasa_apod,
+            "nasa-apod-random": lambda: space_api.get_nasa_apod(count=3),
+            "noaa-space-weather-alerts": space_api.get_noaa_space_weather_alerts,
+            "noaa-solar-wind": space_api.get_noaa_solar_wind_data,
+            "starlink-satellites": space_api.get_starlink_satellites,
+            "eclipse-solar": lambda: space_api.get_eclipse_data("solar"),
+            "eclipse-lunar": lambda: space_api.get_eclipse_data("lunar"),
         }
         
         if data_type.startswith("planet-"):

@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     nasa_api_key: Optional[str] = "DEMO_KEY"
     google_api_key: Optional[str] = None
     spacex_api_base: Optional[str] = "https://api.spacexdata.com/v4"
+    n2yo_api_key: Optional[str] = "DEMO_KEY"
     
     # Langchain Agent
     OPENAI_API_KEY: Optional[str] = None

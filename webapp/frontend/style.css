@@ -805,7 +805,7 @@ body {
 
 .capabilities-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
 }
 
@@ -843,6 +843,60 @@ body {
     font-size: 0.9rem;
     line-height: 1.5;
     margin-bottom: 0.5rem;
+}
+
+/* MCP Tools Section */
+.mcp-tools-section {
+    padding: 2rem 1.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.mcp-tools-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.mcp-tool-card {
+    background: rgba(26, 26, 46, 0.6);
+    border: 1px solid rgba(255, 190, 11, 0.2);
+    border-radius: 12px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: all 0.3s ease;
+    min-height: 120px;
+}
+
+.mcp-tool-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(255, 190, 11, 0.2);
+    border-color: rgba(255, 190, 11, 0.4);
+}
+
+.tool-icon {
+    font-size: 2rem;
+    margin-bottom: 0.8rem;
+}
+
+.tool-info h4 {
+    font-family: var(--font-primary);
+    color: var(--space-gold);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    text-shadow: 0 0 6px rgba(255, 190, 11, 0.3);
+}
+
+.tool-info p {
+    color: var(--space-gray);
+    font-size: 0.75rem;
+    line-height: 1.4;
+    margin: 0;
 }
 
 .suggestion-chip {
@@ -1150,14 +1204,22 @@ body {
     
     .chat-section {
         order: 1;
-        height: 65vh;
-        min-height: 450px;
+        height: 85vh;
+        min-height: 560px;
         margin: 0;
     }
+
+    /* Let messages expand inside the taller chat section */
+    .chat-messages { max-height: none; }
     
     .capabilities-grid {
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        grid-template-columns: repeat(2, 1fr);
         gap: 1rem;
+    }
+    
+    .mcp-tools-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.8rem;
     }
     
     .suggestion-chip {
@@ -1192,6 +1254,7 @@ body {
     .main-content {
         padding: 0.8rem;
         gap: 1.2rem;
+        min-height: 100svh; /* small viewport height to avoid mobile URL bar issues */
     }
     
     .sidebar, .sidebar-right {
@@ -1208,56 +1271,46 @@ body {
     }
     
     .chat-header {
-        padding: 1rem;
+        padding: 0.8rem 1rem;
     }
     
     .chat-header h2 {
-        font-size: 1.3rem;
-    }
-    
-    .chat-messages {
-        padding: 1rem;
-        gap: 1rem;
-    }
-    
-    .message {
-        max-width: 95%;
-    }
-    
-    .message-avatar {
-        width: 32px;
-        height: 32px;
         font-size: 1.2rem;
     }
+
+    /* Hide tagline to reduce header clutter on small screens */
+    .chat-header p { display: none; }
     
-    .message-content {
-        padding: 0.6rem 0.8rem;
-        font-size: 0.9rem;
+    .chat-messages {
+        padding: 0.9rem;
+        gap: 0.8rem;
+        max-height: none; /* allow flex to allocate remaining height */
+        min-height: 0; /* fix flex overflow on some mobile browsers */
     }
     
-    .chat-input-container {
-        padding: 1rem;
-    }
+    .message { max-width: 98%; }
+    
+    .message-avatar { width: 28px; height: 28px; font-size: 1rem; }
+    
+    .message-content { padding: 0.55rem 0.7rem; font-size: 0.92rem; }
+    
+    .chat-input-container { padding: 0.8rem; }
     
     .chat-input-wrapper {
         background: rgba(26, 26, 46, 0.6);
-        border: 1px solid rgba(0, 217, 255, 0.3);
+        border: 1px solid rgba(0, 217, 255, 0.25);
         border-radius: 12px;
-        padding: 0.5rem;
+        padding: 0.4rem;
     }
+
+    .chat-input-wrapper:focus-within { box-shadow: 0 0 0 2px rgba(0, 217, 255, 0.25); }
     
-    #chat-input {
-        padding: 0.8rem;
-        font-size: 1rem;
-        border-radius: 8px;
-    }
+    #chat-input { padding: 0.75rem; font-size: 0.96rem; border-radius: 8px; }
+
+    /* Reduce aggressive glow on focus */
+    #chat-input:focus { box-shadow: none; }
     
-    .send-button {
-        width: 36px;
-        height: 36px;
-        margin: 0;
-        border-radius: 8px;
-    }
+    .send-button { width: 34px; height: 34px; margin: 0; border-radius: 8px; }
     
     .send-icon {
         font-size: 1.2rem;
@@ -1266,6 +1319,29 @@ body {
     .capabilities-grid {
         grid-template-columns: 1fr;
         gap: 1rem;
+    }
+    
+    .mcp-tools-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.8rem;
+    }
+    
+    .mcp-tool-card {
+        padding: 0.8rem;
+        min-height: 100px;
+    }
+    
+    .tool-icon {
+        font-size: 1.5rem;
+        margin-bottom: 0.6rem;
+    }
+    
+    .tool-info h4 {
+        font-size: 0.8rem;
+    }
+    
+    .tool-info p {
+        font-size: 0.7rem;
     }
     
     .capability-card {
@@ -1317,9 +1393,11 @@ body {
     }
     
     .chat-section {
-        height: 60vh;
-        min-height: 400px;
+        height: 88vh;
+        min-height: 560px;
     }
+
+    .chat-messages { max-height: none; }
     
     .widget-header h3 {
         font-size: 0.9rem;
@@ -1432,29 +1510,31 @@ pre code {
 
 .clear-chat-button {
     position: absolute;
-    top: 50%;
-    right: 1.5rem;
-    transform: translateY(-50%);
-    background: transparent;
-    border: none;
+    top: 0.75rem;
+    right: 0.75rem;
+    transform: none;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(0, 217, 255, 0.25);
     color: var(--space-gray);
-    font-size: 2.5rem;
+    font-size: 1.35rem;
     font-weight: 300;
     line-height: 1;
     cursor: pointer;
-    width: 44px;
-    height: 44px;
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
-    transition: all 0.3s ease;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    opacity: 0.8;
 }
 
 .clear-chat-button:hover {
-    color: var(--space-pink);
-    background: rgba(255, 0, 110, 0.1);
-    transform: translateY(-50%);
+    color: var(--space-white);
+    background: rgba(0, 217, 255, 0.18);
+    border-color: rgba(0, 217, 255, 0.5);
+    opacity: 1;
 }
 
 /* Scroll to bottom button */
