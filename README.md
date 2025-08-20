@@ -73,18 +73,6 @@
 5.  **Open your browser:**
     Navigate to `http://localhost:8000` to see the application in action.
 
-### Deployment to Vercel
-
-This application is optimized for serverless deployment on Vercel.
-
-1.  **Deploy with a single command:**
-    From the project root, run the `vercel` command. Vercel will automatically use the `vercel.json` configuration.
-    ```bash
-    vercel
-    ```
-
-2.  **Set Environment Variables in Vercel:**
-    In your Vercel project settings, add the `GOOGLE_API_KEY` and `SECRET_KEY` to the environment variables.
 
 ## 🚀 Demo Queries
 
