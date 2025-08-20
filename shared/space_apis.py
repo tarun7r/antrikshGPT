@@ -806,8 +806,8 @@ class SpaceAPIClient:
             params["date"] = date
         
         try:
-            # Use a longer timeout for NASA Earth imagery API
-            timeout = aiohttp.ClientTimeout(total=60)  # 60 seconds timeout
+            # Use a shorter timeout for NASA Earth imagery API to avoid long waits
+            timeout = aiohttp.ClientTimeout(total=30)  # 30 seconds timeout
             async with aiohttp.ClientSession(timeout=timeout) as session:
                 async with session.get(url, params=params) as response:
                     if response.status == 200:
@@ -852,13 +852,37 @@ class SpaceAPIClient:
                         logger.error(error_msg)
                         return {"error": error_msg}
         except asyncio.TimeoutError:
-            error_msg = "NASA Earth imagery API request timed out (60s). The service may be experiencing high load."
+            error_msg = "NASA Earth imagery API request timed out (30s). The service may be experiencing high load."
             logger.error(error_msg)
-            return {"error": error_msg}
+            # Provide a helpful fallback response with location info
+            fallback_result = {
+                "error": error_msg,
+                "location_info": {
+                    "latitude": lat,
+                    "longitude": lon,
+                    "dimension": dim,
+                    "date": date or "latest",
+                    "note": "NASA Landsat 8 Earth imagery (service temporarily unavailable)"
+                },
+                "suggestion": "Try again later or use a different date. The NASA Earth imagery service can be slow during peak hours."
+            }
+            return fallback_result
         except Exception as e:
             error_msg = f"Error fetching NASA Earth imagery: {str(e)}"
             logger.error(error_msg)
-            return {"error": error_msg}
+            # Provide a helpful fallback response
+            fallback_result = {
+                "error": error_msg,
+                "location_info": {
+                    "latitude": lat,
+                    "longitude": lon,
+                    "dimension": dim,
+                    "date": date or "latest",
+                    "note": "NASA Landsat 8 Earth imagery (service error)"
+                },
+                "suggestion": "The NASA Earth imagery service may be temporarily unavailable. Please try again later."
+            }
+            return fallback_result
 
     async def get_eclipse_data(self, eclipse_type: str = "solar") -> Dict[str, Any]:
         """Get upcoming eclipse data using web search (as there's no free dedicated eclipse API)."""

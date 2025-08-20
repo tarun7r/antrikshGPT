@@ -46,7 +46,7 @@
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/your-username/antrikshGPT.git
+    git clone git clone https://github.com/tarun7r/antrikshGPT.git
     cd antrikshGPT
     ```
 

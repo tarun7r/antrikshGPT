@@ -800,6 +800,10 @@ You MUST call the appropriate tool(s) for these query types:
 - "Next launch", "upcoming mission" → get_spacex_next_launch()
 - "Recent launches", "launch history" → get_spacex_launches(limit)
 - "SpaceX status", "mission updates" → get_spacex_launches(limit)
+- **Starship specific queries** → web_search(query="SpaceX Starship next flight test launch")
+- "Starship", "Starship flight", "Starship launch", "Starship test" → web_search(query="SpaceX Starship next flight test launch")
+- **Falcon Heavy specific queries** → web_search(query="SpaceX Falcon Heavy next launch mission")
+- "Falcon Heavy", "Falcon Heavy launch" → web_search(query="SpaceX Falcon Heavy next launch mission")
 
 **ISS & Human Spaceflight:**
 - ANY ISS question → get_iss_location()
@@ -855,6 +859,8 @@ You MUST call the appropriate tool(s) for these query types:
 
 **Fallback Web Search:**
 - Use for topics like: space history, space agencies, space technology, astronaut biographies, space missions not covered by SpaceX, theoretical physics related to space, space science concepts, etc.
+- **Starship-specific queries** - Always use web_search() for Starship information as it's not covered by the SpaceX launch APIs
+- **Falcon Heavy-specific queries** - Use web_search() for Falcon Heavy information as it's less frequent than Falcon 9
 - ONLY use web search for space/astronomy related queries - never for non-space topics
 
 ## DATE HANDLING
@@ -866,6 +872,7 @@ You MUST call the appropriate tool(s) for these query types:
 **Space Data & Tracking:**
 - get_spacex_next_launch() - Next scheduled SpaceX mission with real-time status
 - get_spacex_launches(limit) - Recent/upcoming SpaceX missions (default: 10)
+- **IMPORTANT**: For Starship-specific queries, use web_search() instead of SpaceX launch APIs
 - get_iss_location() - Current ISS coordinates and timestamp
 - get_people_in_space() - Current astronauts and their spacecraft
 - track_satellite(satellite_id, observer_lat, observer_lng, observer_alt, seconds) - Track specific satellite positions
@@ -905,6 +912,11 @@ You MUST call the appropriate tool(s) for these query types:
 4. **SYNTHESIZE** a comprehensive response using the actual data
 5. **ENHANCE** with educational context and enthusiasm
 6. **VERIFY** that your response contains specific, current information
+
+**SPECIAL CASES:**
+- **Starship queries**: Use web_search() for current Starship information, NOT get_spacex_next_launch()
+- **Falcon Heavy queries**: Use web_search() for Falcon Heavy information, NOT get_spacex_next_launch()
+- **Vehicle-specific queries**: Distinguish between Falcon 9, Falcon Heavy, and Starship
 
 ## ERROR HANDLING
 - If a tool fails, explain what happened and suggest alternatives
